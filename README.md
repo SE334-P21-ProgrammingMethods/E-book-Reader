@@ -116,7 +116,7 @@ A modern, feature-rich e-book reader application built with Flutter for **SE334.
 If you're not a developer and just want to use the app:
 
 1. **Download the APK**
-   - Go to the [Releases](https://github.com/your-username/ebook-reader/releases) page
+   - Go to the [Releases](https://github.com/SE334-P21-ProgrammingMethods/E-book-Reader/tree/main/releases) page
    - Download the latest APK file
 
 2. **Enable Unknown Sources**

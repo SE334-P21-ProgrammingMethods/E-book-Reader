@@ -266,6 +266,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 _For educational purposes - SE334.P21 Programming Methods_
 
-[Report Bug](https://github.com/your-username/ebook-reader/issues) · [Request Feature](https://github.com/your-username/ebook-reader/issues)
-
 </div>

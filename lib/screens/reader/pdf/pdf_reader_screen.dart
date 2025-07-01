@@ -411,9 +411,9 @@ class _PDFReaderScreen extends State<PDFReaderScreen>
                                   );
                                 },
                               );
-                            },
-                          ),
-                        ),
+                            }
+                          )
+                        )
                       );
                     },
                     onLongPress: () async {
@@ -854,8 +854,15 @@ class _PDFReaderScreen extends State<PDFReaderScreen>
     final bookmarkCubit = context.read<BookmarkCubit>();
     final pdfCubit = context.read<PdfReaderCubit>();
     await bookmarkCubit.loadBookmarks(widget.book.id);
-    if (!mounted) return;
 
+    // If we're opening from a bookmark link (i.e., from the BookmarksScreen),
+    // just jump directly to the page without showing the bottom sheet
+    if (widget.openBookmarkPage != null && widget.openBookmarkPage == page) {
+      _pdfController.jumpToPage(page);
+      return;
+    }
+
+    // Otherwise show the bottom sheet as usual
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

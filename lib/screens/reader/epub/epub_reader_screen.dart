@@ -414,6 +414,15 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
     await bookmarkCubit.loadBookmarks(widget.book.id);
     if (!mounted) return;
 
+    // If we're opening from a bookmark link (i.e., from the BookmarksScreen),
+    // just jump directly to the CFI without showing the bottom sheet
+    if (widget.openBookmarkCfi != null && widget.openBookmarkCfi == cfi) {
+      if (_epubController != null && cfi.isNotEmpty) {
+        await _epubController!.display(cfi: cfi);
+      }
+      return;
+    }
+
     // Open the bookmark bottom sheet and jump to the given CFI
     showModalBottomSheet(
       context: context,
@@ -548,8 +557,9 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
         ),
       ),
     );
-    // After opening, jump to the given CFI
-    if (_epubController != null && cfi.isNotEmpty) {
+
+    // After opening, jump to the given CFI (only for non-direct bookmark navigation)
+    if (_epubController != null && cfi.isNotEmpty && widget.openBookmarkCfi != cfi) {
       await Future.delayed(const Duration(milliseconds: 200));
       await _epubController!.display(cfi: cfi);
     }

@@ -96,7 +96,23 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
   @override
   void initState() {
     super.initState();
+
+    // Initialize theme based on current app theme mode
+    final themeCubit = context.read<ThemeCubit>();
+    final isDark = themeCubit.state.themeMode == ThemeMode.dark;
+    _epubTheme = isDark ? EpubTheme.dark() : EpubTheme.light();
+
     _prepareEpub();
+
+    _epubDisplaySettings = EpubDisplaySettings(
+      flow: _currentFlow,
+      snap: false,
+      // spread: EpubSpread.auto,
+      allowScriptedContent: true,
+      useSnapAnimationAndroid: false,
+      theme: _epubTheme,
+    );
+
     if (widget.openBookmarkCfi != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await Future.delayed(const Duration(milliseconds: 400));
@@ -114,14 +130,7 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
         _lastHighlightedCfi = null;
       }
     });
-    _epubDisplaySettings = EpubDisplaySettings(
-      flow: _currentFlow,
-      snap: false,
-      // spread: EpubSpread.auto,
-      allowScriptedContent: true,
-      useSnapAnimationAndroid: false,
-      theme: _epubTheme,
-    );
+
     // If initialCfi is provided, jump to it after loading and override lastReadPage
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (widget.initialCfi != null && _epubController != null) {

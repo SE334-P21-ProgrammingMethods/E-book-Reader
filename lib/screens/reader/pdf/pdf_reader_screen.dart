@@ -127,6 +127,15 @@ class _PDFReaderScreen extends State<PDFReaderScreen>
     if (!widget.skipResumeDialog) {
       _checkAndPromptResumePage();
     }
+
+    if (widget.initialPage != null) {
+      cubit.setCurrentPage(widget.initialPage!);
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _pdfController.jumpToPage(widget.initialPage!);
+      });
+    }
+
     if (widget.initialPage != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _pdfController.jumpToPage(widget.initialPage!);

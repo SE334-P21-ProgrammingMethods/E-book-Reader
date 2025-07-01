@@ -1,28 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../enums/processing/process_state_enum.dart';
 import '../../../widgets/components/dialog_utils.dart';
 import 'forget_password_cubit.dart';
 import 'forget_password_state.dart';
 
-class ForgotPasswordScreen extends StatefulWidget {
+class ForgetPasswordScreen extends StatefulWidget {
   final Function toggleTheme;
 
-  const ForgotPasswordScreen({super.key, required this.toggleTheme});
+  const ForgetPasswordScreen({super.key, required this.toggleTheme});
 
   static Widget newInstance({required void Function() toggleTheme}) => BlocProvider(
         create: (context) => ForgetPasswordCubit(),
-        child: ForgotPasswordScreen(toggleTheme: toggleTheme),
+        child: ForgetPasswordScreen(toggleTheme: toggleTheme),
       );
 
   @override
-  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+  State<ForgetPasswordScreen> createState() => _ForgetPasswordScreenState();
 }
 
-class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
   final _emailController = TextEditingController();
-  String? _errorMessage;
-  bool _isLoading = false;
+  ForgetPasswordCubit get cubit => context.read<ForgetPasswordCubit>();
 
   @override
   void dispose() {
@@ -38,44 +38,35 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final colorScheme = Theme.of(context).colorScheme;
+    final isDarkMode = Theme
+        .of(context)
+        .brightness == Brightness.dark;
+    final colorScheme = Theme
+        .of(context)
+        .colorScheme;
 
     return Scaffold(
       body: SafeArea(
-        child: BlocProvider(
-          create: (_) => ForgetPasswordCubit(),
-          child: BlocListener<ForgetPasswordCubit, ForgetPasswordState>(
-            listener: (context, state) {
-              if (state is ForgetPasswordLoading) {
-                setState(() {
-                  _isLoading = true;
-                  _errorMessage = null;
+        child: BlocConsumer<ForgetPasswordCubit, ForgetPasswordState>(
+          listener: (context, state) async {
+            if (state.processState == ProcessState.success) {
+              if (mounted) {
+                WidgetsBinding.instance.addPostFrameCallback((_) async {
+                  await showResetPasswordSentDialog(context);
                 });
-              } else if (state is ForgetPasswordSuccess) {
-                if (mounted) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    showResetPasswordSentDialog(context);
-                  });
-                }
-                setState(() {
-                  _isLoading = false;
-                  _errorMessage = null;
-                });
-              } else if (state is ForgetPasswordFailure) {
-                setState(() {
-                  _isLoading = false;
-                  _errorMessage = state.error;
-                });
-                if (mounted) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    showOkDialog(
-                        context, state.error);
-                  });
-                }
               }
-            },
-            child: Center(
+              cubit.toIdle();
+            } else if (state.processState == ProcessState.failure) {
+              if (mounted) {
+                WidgetsBinding.instance.addPostFrameCallback((_) async {
+                  await showOkDialog(context, state.message);
+                });
+              }
+              cubit.toIdle();
+            }
+          },
+          builder: (context, state) {
+            return Center(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
@@ -87,13 +78,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       children: [
                         Text(
                           'Reset Password',
-                          style: Theme.of(context)
+                          style: Theme
+                              .of(context)
                               .textTheme
                               .headlineMedium
                               ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: colorScheme.onSurface,
-                              ),
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.onSurface,
+                          ),
                         ),
                         IconButton(
                           icon: Icon(
@@ -119,7 +111,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       ),
                     ),
                     const SizedBox(height: 32),
-                    if (_errorMessage != null)
+                    if (state.message.isNotEmpty)
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
@@ -130,11 +122,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           ),
                         ),
                         child: Text(
-                          _errorMessage!,
+                          state.message,
                           style: TextStyle(color: colorScheme.error),
                         ),
                       ),
-                    if (_errorMessage != null) const SizedBox(height: 16),
+                    if (state.message.isNotEmpty) const SizedBox(height: 16),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -157,16 +149,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
-                      onPressed: _isLoading ? null : _handleResetPassword,
-                      child: _isLoading
+                      onPressed: state.processState == ProcessState.loading ? null : _handleResetPassword,
+                      child:  state.processState == ProcessState.loading
                           ? SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: colorScheme.onPrimary,
-                              ),
-                            )
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: colorScheme.onPrimary,
+                        ),
+                      )
                           : const Text('Send Reset Link'),
                     ),
                     const SizedBox(height: 24),
@@ -181,8 +173,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   ],
                 ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );

@@ -3,14 +3,17 @@ import 'package:ebook_reader/screens/auth/sign-up/signup_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../enums/processing/process_state_enum.dart';
 import '../../../widgets/components/dialog_utils.dart';
+import '../sign-in/signin_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   final Function toggleTheme;
 
   const SignUpScreen({super.key, required this.toggleTheme});
 
-  static Widget newInstance({required void Function() toggleTheme}) => BlocProvider(
+  static Widget newInstance({required void Function() toggleTheme}) =>
+      BlocProvider(
         create: (context) => SignupCubit(),
         child: SignUpScreen(toggleTheme: toggleTheme),
       );
@@ -24,10 +27,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  String? _errorMessage;
-  bool _isLoading = false;
   bool _showPassword = false;
   bool _showConfirmPassword = false;
+  SignupCubit get cubit => context.read<SignupCubit>();
 
   @override
   void dispose() {
@@ -38,54 +40,49 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
-  void _handleSignUp() {
-    setState(() {
-      _errorMessage = null;
-    });
-    if (_passwordController.text != _confirmPasswordController.text) {
-      setState(() {
-        _errorMessage = "Passwords do not match";
-      });
-      return;
-    }
-    context.read<SignupCubit>().signUp(
-          name: _nameController.text.trim(),
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
-        );
-  }
+  // void _handleSignUp() {
+  //   if (_passwordController.text != _confirmPasswordController.text) {
+  //     setState(() {
+  //       _errorMessage = "Passwords do not match";
+  //     });
+  //     return;
+  //   }
+  //   context.read<SignupCubit>().signUp(
+  //         name: _nameController.text.trim(),
+  //         email: _emailController.text.trim(),
+  //         password: _passwordController.text,
+  //       );
+  // }
 
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return BlocListener<SignupCubit, SignupState>(
+    return BlocConsumer<SignupCubit, SignupState>(
       listener: (context, state) async {
-        if (state is SignupLoading) {
-          setState(() {
-            _isLoading = true;
-          });
-        } else if (state is SignupSuccess) {
-          setState(() {
-            _isLoading = false;
-          });
+        if (state.processState == ProcessState.success) {
           await showOkDialog(
             context,
-            'A verification email has been sent to your registered email address. Please verify your email before signing in.',
+            state.message,
             title: 'Verify Your Email',
             okLabel: 'OK',
           );
+          cubit.toIdle();
           Navigator.pushNamedAndRemoveUntil(
               context, '/sign-in', (route) => false);
-        } else if (state is SignupFailure) {
-          setState(() {
-            _isLoading = false;
-            _errorMessage = state.error;
-          });
+        } else if (state.processState == ProcessState.failure) {
+          await showOkDialog(
+            context,
+            state.message,
+            title: 'Error Signing Up',
+            okLabel: 'OK',
+          );
+          cubit.toIdle();
         }
       },
-      child: Scaffold(
+    builder: (context, state) {
+      return Scaffold(
         body: SafeArea(
           child: Center(
             child: SingleChildScrollView(
@@ -99,13 +96,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     children: [
                       Text(
                         'Create Account',
-                        style: Theme.of(context)
+                        style: Theme
+                            .of(context)
                             .textTheme
                             .headlineMedium
                             ?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: colorScheme.onSurface,
-                            ),
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onSurface,
+                        ),
                       ),
                       IconButton(
                         icon: Icon(
@@ -131,7 +129,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                   ),
                   const SizedBox(height: 32),
-                  if (_errorMessage != null)
+                  if (state.message.isNotEmpty)
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -142,11 +140,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                       ),
                       child: Text(
-                        _errorMessage!,
+                        state.message,
                         style: TextStyle(color: colorScheme.error),
                       ),
                     ),
-                  if (_errorMessage != null) const SizedBox(height: 16),
+                  if (state.message.isNotEmpty) const SizedBox(height: 16),
                   GestureDetector(
                     onTap: () => FocusScope.of(context).unfocus(),
                     child: Column(
@@ -184,25 +182,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
                                   color:
-                                      colorScheme.brightness == Brightness.dark
-                                          ? Colors.white.withValues(alpha: 0.7)
-                                          : Colors.grey.withValues(alpha: 0.3),
+                                  colorScheme.brightness == Brightness.dark
+                                      ? Colors.white.withValues(alpha: 0.7)
+                                      : Colors.grey.withValues(alpha: 0.3),
                                 ),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
                                   color:
-                                      colorScheme.brightness == Brightness.dark
-                                          ? Colors.white.withValues(alpha: 0.7)
-                                          : Colors.grey.withValues(alpha: 0.3),
+                                  colorScheme.brightness == Brightness.dark
+                                      ? Colors.white.withValues(alpha: 0.7)
+                                      : Colors.grey.withValues(alpha: 0.3),
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
                                     color: colorScheme.brightness ==
-                                            Brightness.dark
+                                        Brightness.dark
                                         ? Colors.white
                                         : Colors.grey),
                               ),
@@ -250,25 +248,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
                                   color:
-                                      colorScheme.brightness == Brightness.dark
-                                          ? Colors.white.withValues(alpha: 0.7)
-                                          : Colors.grey.withValues(alpha: 0.3),
+                                  colorScheme.brightness == Brightness.dark
+                                      ? Colors.white.withValues(alpha: 0.7)
+                                      : Colors.grey.withValues(alpha: 0.3),
                                 ),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
                                   color:
-                                      colorScheme.brightness == Brightness.dark
-                                          ? Colors.white.withValues(alpha: 0.7)
-                                          : Colors.grey.withValues(alpha: 0.3),
+                                  colorScheme.brightness == Brightness.dark
+                                      ? Colors.white.withValues(alpha: 0.7)
+                                      : Colors.grey.withValues(alpha: 0.3),
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
                                     color: colorScheme.brightness ==
-                                            Brightness.dark
+                                        Brightness.dark
                                         ? Colors.white
                                         : Colors.grey),
                               ),
@@ -318,25 +316,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
                                   color:
-                                      colorScheme.brightness == Brightness.dark
-                                          ? Colors.white.withValues(alpha: 0.7)
-                                          : Colors.grey.withValues(alpha: 0.3),
+                                  colorScheme.brightness == Brightness.dark
+                                      ? Colors.white.withValues(alpha: 0.7)
+                                      : Colors.grey.withValues(alpha: 0.3),
                                 ),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
                                   color:
-                                      colorScheme.brightness == Brightness.dark
-                                          ? Colors.white.withValues(alpha: 0.7)
-                                          : Colors.grey.withValues(alpha: 0.3),
+                                  colorScheme.brightness == Brightness.dark
+                                      ? Colors.white.withValues(alpha: 0.7)
+                                      : Colors.grey.withValues(alpha: 0.3),
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
                                     color: colorScheme.brightness ==
-                                            Brightness.dark
+                                        Brightness.dark
                                         ? Colors.white
                                         : Colors.grey),
                               ),
@@ -395,25 +393,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
                                   color:
-                                      colorScheme.brightness == Brightness.dark
-                                          ? Colors.white.withValues(alpha: 0.7)
-                                          : Colors.grey.withValues(alpha: 0.3),
+                                  colorScheme.brightness == Brightness.dark
+                                      ? Colors.white.withValues(alpha: 0.7)
+                                      : Colors.grey.withValues(alpha: 0.3),
                                 ),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
                                   color:
-                                      colorScheme.brightness == Brightness.dark
-                                          ? Colors.white.withValues(alpha: 0.7)
-                                          : Colors.grey.withValues(alpha: 0.3),
+                                  colorScheme.brightness == Brightness.dark
+                                      ? Colors.white.withValues(alpha: 0.7)
+                                      : Colors.grey.withValues(alpha: 0.3),
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
                                     color: colorScheme.brightness ==
-                                            Brightness.dark
+                                        Brightness.dark
                                         ? Colors.white
                                         : Colors.grey),
                               ),
@@ -424,7 +422,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 onPressed: () {
                                   setState(() {
                                     _showConfirmPassword =
-                                        !_showConfirmPassword;
+                                    !_showConfirmPassword;
                                   });
                                 },
                               ),
@@ -436,7 +434,83 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton(
-                    onPressed: _isLoading ? null : _handleSignUp,
+                    onPressed: state.processState == ProcessState.loading ? null : () {
+                      // Validate all fields are filled
+                      if (_nameController.text.trim().isEmpty) {
+                        cubit.toFailure('Please enter your name');
+                        return;
+                      }
+
+                      // Email validation
+                      final email = _emailController.text.trim();
+                      if (email.isEmpty) {
+                        cubit.toFailure('Please enter your email address');
+                        return;
+                      }
+
+                      // Email format validation using regex
+                      final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+                      if (!emailRegex.hasMatch(email)) {
+                        cubit.toFailure('Please enter a valid email address');
+                        return;
+                      }
+
+                      // Password validation
+                      final password = _passwordController.text;
+                      if (password.isEmpty) {
+                        cubit.toFailure('Please enter a password');
+                        return;
+                      }
+
+                      // Password length check
+                      if (password.length < 6) {
+                        cubit.toFailure('Password must be at least 6 characters long');
+                        return;
+                      }
+
+                      // Password strength validation
+                      final hasUppercase = password.contains(RegExp(r'[A-Z]'));
+                      final hasLowercase = password.contains(RegExp(r'[a-z]'));
+                      final hasDigit = password.contains(RegExp(r'[0-9]'));
+                      final hasSpecialChar = password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+
+                      if (!hasUppercase) {
+                        cubit.toFailure('Password must contain at least one uppercase letter');
+                        return;
+                      }
+
+                      if (!hasLowercase) {
+                        cubit.toFailure('Password must contain at least one lowercase letter');
+                        return;
+                      }
+
+                      if (!hasDigit) {
+                        cubit.toFailure('Password must contain at least one number');
+                        return;
+                      }
+
+                      if (!hasSpecialChar) {
+                        cubit.toFailure('Password must contain at least one special character (!@#\$%^&*(),.?":{}|<>)');
+                        return;
+                      }
+
+                      if (_confirmPasswordController.text.isEmpty) {
+                        cubit.toFailure('Please confirm your password');
+                        return;
+                      }
+
+                      if (password != _confirmPasswordController.text) {
+                        cubit.toFailure('Passwords do not match');
+                        return;
+                      }
+
+                      // All validations passed, proceed with signup
+                      cubit.signUp(
+                        name: _nameController.text.trim(),
+                        email: email,
+                        password: password,
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
                       side: BorderSide(
                         color: colorScheme.brightness == Brightness.dark
@@ -447,15 +521,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: _isLoading
+                    child: state.processState == ProcessState.loading
                         ? SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: colorScheme.onPrimary,
-                            ),
-                          )
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: colorScheme.onPrimary,
+                      ),
+                    )
                         : const Text('Sign Up'),
                   ),
                   const SizedBox(height: 24),
@@ -470,7 +544,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                       TextButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, '/');
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  SignInScreen.newInstance(
+                                    toggleTheme: () => widget.toggleTheme(),
+                                  ),
+                            ),
+                                (route) => false,
+                          );
                         },
                         child: const Text('Sign in'),
                       ),
@@ -481,7 +564,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ),
           ),
         ),
-      ),
+      );
+    },
     );
   }
 }

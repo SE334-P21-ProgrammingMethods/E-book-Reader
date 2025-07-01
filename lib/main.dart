@@ -1,4 +1,3 @@
-
 import 'package:ebook_reader/screens/auth/sign-up/signup_screen.dart';
 import 'package:ebook_reader/screens/library/library_screen.dart';
 import 'package:ebook_reader/screens/theme/theme_cubit.dart';
@@ -26,7 +25,12 @@ void main() async {
   await Firebase.initializeApp();
   // await FirebaseFirestore.instance.collection('test').add({'test': 'value'});
 
-  runApp(const MyApp());
+  runApp(
+    BlocProvider(
+      create: (context) => ThemeCubit(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -102,7 +106,7 @@ class MyApp extends StatelessWidget {
           ],
           home: const AuthGate(),
           routes: {
-            '/forgot-password': (context) => ForgotPasswordScreen.newInstance(
+            '/forgot-password': (context) => ForgetPasswordScreen.newInstance(
               toggleTheme: () => context.read<ThemeCubit>().toggleTheme(),
             ),
             '/sign-up': (context) => SignUpScreen.newInstance(
@@ -155,20 +159,30 @@ class AuthGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<User?>(
-      future: Future.value(FirebaseAuth.instance.currentUser),
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-              body: Center(child: CircularProgressIndicator()));
+          return const Center(child: CircularProgressIndicator());
         }
-        if (snapshot.data == null) {
-          return SignInScreen.newInstance(
+
+        // Get the current route name
+        final currentRoute = ModalRoute.of(context)?.settings.name;
+
+        // If we're on the sign-up screen, don't redirect
+        if (currentRoute == '/sign-up') {
+          return SignUpScreen.newInstance(
             toggleTheme: () => context.read<ThemeCubit>().toggleTheme(),
           );
-        } else {
+        }
+        else if (snapshot.hasData) {
           return const MainScreen();
         }
+
+        // For all other cases, show sign in screen
+        return SignInScreen.newInstance(
+          toggleTheme: () => context.read<ThemeCubit>().toggleTheme(),
+        );
       },
     );
   }

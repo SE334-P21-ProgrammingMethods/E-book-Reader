@@ -1,19 +1,25 @@
+import 'package:ebook_reader/enums/processing/process_state_enum.dart';
 import 'package:equatable/equatable.dart';
 
-abstract class ForgetPasswordState extends Equatable {
+class ForgetPasswordState extends Equatable {
+  final ProcessState processState;
+  final String message;
+
+  const ForgetPasswordState({
+    this.processState = ProcessState.idle,
+    this.message = '',
+  });
+
   @override
-  List<Object?> get props => [];
-}
+  List<Object?> get props => [processState, message];
 
-class ForgetPasswordInitial extends ForgetPasswordState {}
-
-class ForgetPasswordLoading extends ForgetPasswordState {}
-
-class ForgetPasswordSuccess extends ForgetPasswordState {}
-
-class ForgetPasswordFailure extends ForgetPasswordState {
-  final String error;
-  ForgetPasswordFailure(this.error);
-  @override
-  List<Object?> get props => [error];
+  ForgetPasswordState copyWith({
+    ProcessState? processState,
+    String? message,
+  }) {
+    return ForgetPasswordState(
+      processState: processState ?? this.processState,
+      message: message ?? this.message,
+    );
+  }
 }

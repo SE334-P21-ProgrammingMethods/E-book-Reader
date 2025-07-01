@@ -1,20 +1,28 @@
+import 'dart:io';
+
 import 'package:equatable/equatable.dart';
 
-abstract class SignupState extends Equatable {
-  @override
-  List<Object?> get props => [];
-}
+import '../../../enums/processing/process_state_enum.dart';
 
-class SignupInitial extends SignupState {}
+class SignupState extends Equatable {
+  final ProcessState processState;
+  final String message;
 
-class SignupLoading extends SignupState {}
-
-class SignupSuccess extends SignupState {}
-
-class SignupFailure extends SignupState {
-  final String error;
-  SignupFailure(this.error);
+  const SignupState({
+    this.processState = ProcessState.idle,
+    this.message = '',
+  });
 
   @override
-  List<Object?> get props => [error];
+  List<Object?> get props => [message, processState];
+
+  SignupState copyWith({
+    ProcessState? processState,
+    String? message,
+  }) {
+    return SignupState(
+      processState: processState ?? this.processState,
+      message: message ?? this.message,
+    );
+  }
 }

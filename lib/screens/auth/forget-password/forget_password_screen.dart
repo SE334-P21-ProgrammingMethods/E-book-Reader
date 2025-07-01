@@ -10,6 +10,11 @@ class ForgotPasswordScreen extends StatefulWidget {
 
   const ForgotPasswordScreen({super.key, required this.toggleTheme});
 
+  static Widget newInstance({required void Function() toggleTheme}) => BlocProvider(
+        create: (context) => ForgetPasswordCubit(),
+        child: ForgotPasswordScreen(toggleTheme: toggleTheme),
+      );
+
   @override
   State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }

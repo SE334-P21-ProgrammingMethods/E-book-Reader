@@ -10,6 +10,11 @@ import '../../widgets/settings/user_account.dart';
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
+  static Widget newInstance() => BlocProvider(
+    create: (context) => SettingCubit(),
+    child: const SettingsScreen(),
+  );
+
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
 }

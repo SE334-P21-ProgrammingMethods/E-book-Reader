@@ -35,8 +35,7 @@ class EPUBReaderScreen extends StatefulWidget {
       this.openBookmarkCfi})
       : super(key: key);
 
-  static Widget withLibraryCubit({
-    required BuildContext context,
+  static Widget newInstance({
     required Book book,
     Future<void> Function(String bookId, String lastReadPage)?
         onSaveLastProgress,
@@ -44,16 +43,12 @@ class EPUBReaderScreen extends StatefulWidget {
     bool skipResumeDialog = false,
     String? openBookmarkCfi,
   }) {
-    final cubit = BlocProvider.of<LibraryCubit>(context);
-    return BlocProvider.value(
-      value: cubit,
-      child: EPUBReaderScreen(
-        book: book,
-        onSaveLastProgress: onSaveLastProgress,
-        initialCfi: initialCfi,
-        skipResumeDialog: skipResumeDialog,
-        openBookmarkCfi: openBookmarkCfi,
-      ),
+    return EPUBReaderScreen(
+      book: book,
+      onSaveLastProgress: onSaveLastProgress,
+      initialCfi: initialCfi,
+      skipResumeDialog: skipResumeDialog,
+      openBookmarkCfi: openBookmarkCfi,
     );
   }
 

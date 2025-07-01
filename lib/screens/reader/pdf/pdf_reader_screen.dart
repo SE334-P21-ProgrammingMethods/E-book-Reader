@@ -22,72 +22,45 @@ import '../../theme/theme_cubit.dart';
 
 const String kPdfPlaceholderAsset = 'lib/assets/pdf-placeholder.webp';
 
-class PDFReaderScreen extends StatelessWidget {
+class PDFReaderScreen extends StatefulWidget {
   final Book book;
-  final Future<void> Function(String bookId, String lastReadPage)?
-      onSaveLastPage;
+  final Future<void> Function(String bookId, String lastReadPage)? onSaveLastPage;
   final int? initialPage;
   final int? openBookmarkPage;
   final bool skipResumeDialog;
-  const PDFReaderScreen(
-      {Key? key,
-      required this.book,
-      this.onSaveLastPage,
+  const PDFReaderScreen({
+    Key? key,
+    required this.book,
+    this.onSaveLastPage,
       this.initialPage,
-      this.openBookmarkPage,
-      this.skipResumeDialog = false})
+    this.openBookmarkPage,
+    this.skipResumeDialog = false})
       : super(key: key);
 
-  static Widget withLibraryCubit({
-    required BuildContext context,
+  static Widget newInstance({
     required Book book,
     Future<void> Function(String bookId, String lastReadPage)? onSaveLastPage,
     int? initialPage,
     int? openBookmarkPage,
     bool skipResumeDialog = false,
   }) {
-    return PDFReaderScreen(
-      book: book,
-      onSaveLastPage: onSaveLastPage,
-      initialPage: initialPage,
-      openBookmarkPage: openBookmarkPage,
-      skipResumeDialog: skipResumeDialog,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _PDFReaderScreenBody(
-        key: ValueKey(book.id),
+    return BlocProvider(
+      create: (context) => PdfReaderCubit(),
+      child: PDFReaderScreen(
         book: book,
         onSaveLastPage: onSaveLastPage,
         initialPage: initialPage,
         openBookmarkPage: openBookmarkPage,
-        skipResumeDialog: skipResumeDialog);
+        skipResumeDialog: skipResumeDialog,
+      ),
+    );
   }
-}
-
-class _PDFReaderScreenBody extends StatefulWidget {
-  final Book book;
-  final Future<void> Function(String bookId, String lastReadPage)?
-      onSaveLastPage;
-  final int? initialPage;
-  final int? openBookmarkPage;
-  final bool skipResumeDialog;
-  const _PDFReaderScreenBody(
-      {Key? key,
-      required this.book,
-      this.onSaveLastPage,
-      this.initialPage,
-      this.openBookmarkPage,
-      this.skipResumeDialog = false})
-      : super(key: key);
 
   @override
-  State<_PDFReaderScreenBody> createState() => _PDFReaderScreenBodyState();
+  State<PDFReaderScreen> createState() => _PDFReaderScreen();
 }
 
-class _PDFReaderScreenBodyState extends State<_PDFReaderScreenBody>
+class _PDFReaderScreen extends State<PDFReaderScreen>
     with AutomaticKeepAliveClientMixin {
   static final Map<String, PdfViewerController> _controllerCache = {};
   static final Map<String, Future<String>> _futureCache = {};

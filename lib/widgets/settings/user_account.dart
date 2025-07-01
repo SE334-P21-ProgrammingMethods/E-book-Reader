@@ -22,6 +22,7 @@ class _UserAccountState extends State<UserAccount> {
   void _showEditNameSheet(BuildContext context, String currentName) {
     final controller = TextEditingController(text: currentName);
     final userCubit = context.read<SettingCubit>();
+    String? errorText;
 
     void showResultDialog(String title, String message) {
       showDialog(
@@ -46,99 +47,95 @@ class _UserAccountState extends State<UserAccount> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 24,
-            right: 24,
-            top: 24,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Account Info',
-                  style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: 16),
-              TextField(
-                controller: controller,
-                decoration: const InputDecoration(
-                  labelText: 'Username',
-                  border: OutlineInputBorder(),
-                ),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 24,
+                right: 24,
+                top: 24,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
               ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    final newName = controller.text.trim();
-
-                    // Close the bottom sheet first
-                    Navigator.pop(context);
-
-                    if (newName.isEmpty) {
-                      showResultDialog(
-                        'Invalid Name',
-                        'Username cannot be empty.'
-                      );
-                      return;
-                    }
-
-                    if (newName == currentName) {
-                      showResultDialog(
-                        'No Changes',
-                        'The username was not changed.'
-                      );
-                      return;
-                    }
-
-                    try {
-                      // Show loading dialog
-                      showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (dialogContext) => const AlertDialog(
-                          content: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              CircularProgressIndicator(),
-                              SizedBox(height: 16),
-                              Text('Updating username...'),
-                            ],
-                          ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Account Info',
+                      style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: controller,
+                    decoration: InputDecoration(
+                      labelText: 'Username',
+                      border: const OutlineInputBorder(),
+                      errorText: errorText,
+                    ),
+                    onChanged: (_) {
+                      if (errorText != null) {
+                        setState(() => errorText = null);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Cancel'),
                         ),
-                      );
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            final newName = controller.text.trim();
 
-                      // Update the name
-                      await userCubit.updateName(newName);
+                            // Validate input
+                            if (newName.isEmpty) {
+                              setState(() => errorText = 'Username cannot be empty');
+                              return;
+                            }
 
-                      // Close loading dialog
-                      Navigator.pop(context);
+                            if (newName == currentName) {
+                              Navigator.pop(context);
+                              return;
+                            }
 
-                      // Refresh user data
-                      await userCubit.fetchUser();
+                            // Close the bottom sheet
+                            Navigator.pop(context);
 
-                      // Show success dialog
-                      showResultDialog(
-                        'Success',
-                        'Your username has been updated successfully.'
-                      );
-                    } catch (e) {
-                      // Close loading dialog if open
-                      Navigator.pop(context);
+                            try {
+                              // Update the name
+                              await userCubit.updateName(newName);
 
-                      // Show error dialog
-                      showResultDialog(
-                        'Error',
-                        'Failed to update username: ${e.toString()}'
-                      );
-                    }
-                  },
-                  child: const Text('Save'),
-                ),
+                              // Refresh user data
+                              await userCubit.fetchUser();
+
+                              // Show success dialog
+                              showResultDialog(
+                                'Success',
+                                'Your username has been updated successfully.',
+                              );
+                            } catch (e) {
+                              // Close loading dialog if open
+                              Navigator.pop(context);
+
+                              // Show error dialog
+                              showResultDialog(
+                                'Error',
+                                'Failed to update username: ${e.toString()}',
+                              );
+                            }
+                          },
+                          child: const Text('Save'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );

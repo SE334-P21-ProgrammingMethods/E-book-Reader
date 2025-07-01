@@ -10,6 +10,11 @@ class SignUpScreen extends StatefulWidget {
 
   const SignUpScreen({super.key, required this.toggleTheme});
 
+  static Widget newInstance({required void Function() toggleTheme}) => BlocProvider(
+        create: (context) => SignupCubit(),
+        child: SignUpScreen(toggleTheme: toggleTheme),
+      );
+
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
 }

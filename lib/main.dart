@@ -1,17 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:ebook_reader/screens/auth/forget-password/forget_password_cubit.dart';
-import 'package:ebook_reader/screens/auth/sign-in/signin_cubit.dart';
-import 'package:ebook_reader/screens/auth/sign-up/signup_cubit.dart';
+
 import 'package:ebook_reader/screens/auth/sign-up/signup_screen.dart';
-import 'package:ebook_reader/screens/bookmark/bookmark_cubit.dart';
-import 'package:ebook_reader/screens/library/library_cubit.dart';
 import 'package:ebook_reader/screens/library/library_screen.dart';
-import 'package:ebook_reader/screens/reader/pdf/pdf_reader_cubit.dart';
-import 'package:ebook_reader/screens/setting/setting_cubit.dart';
 import 'package:ebook_reader/screens/theme/theme_cubit.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -34,24 +26,7 @@ void main() async {
   await Firebase.initializeApp();
   // await FirebaseFirestore.instance.collection('test').add({'test': 'value'});
 
-  runApp(
-    MultiBlocProvider(
-      providers: [
-        BlocProvider(create: (_) => ThemeCubit()),
-        BlocProvider(create: (_) => SettingCubit()),
-        BlocProvider(create: (_) => BookmarkCubit()),
-        BlocProvider(create: (_) => PdfReaderCubit()),
-        BlocProvider(
-          create: (_) => LibraryCubit(
-            firestore: FirebaseFirestore.instance,
-            storage: FirebaseStorage.instance,
-            auth: FirebaseAuth.instance,
-          ),
-        ),
-      ],
-      child: const MyApp(),
-    ),
-  );
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -127,27 +102,15 @@ class MyApp extends StatelessWidget {
           ],
           home: const AuthGate(),
           routes: {
-            '/forgot-password': (context) => BlocProvider(
-                  create: (_) => ForgetPasswordCubit(),
-                  child: ForgotPasswordScreen(
-                    toggleTheme: () => context.read<ThemeCubit>().toggleTheme(),
-                  ),
-                ),
-            '/sign-up': (context) => BlocProvider(
-                  create: (_) => SignupCubit(),
-                  child: SignUpScreen(
-                    toggleTheme: () => context.read<ThemeCubit>().toggleTheme(),
-                  ),
-                ),
-            '/sign-in': (context) => MultiBlocProvider(
-                  providers: [
-                    BlocProvider.value(value: context.read<SettingCubit>()),
-                    BlocProvider(create: (_) => SigninCubit()),
-                  ],
-                  child: SignInScreen(
-                    toggleTheme: () => context.read<ThemeCubit>().toggleTheme(),
-                  ),
-                ),
+            '/forgot-password': (context) => ForgotPasswordScreen.newInstance(
+              toggleTheme: () => context.read<ThemeCubit>().toggleTheme(),
+            ),
+            '/sign-up': (context) => SignUpScreen.newInstance(
+              toggleTheme: () => context.read<ThemeCubit>().toggleTheme(),
+            ),
+            '/sign-in': (context) => SignInScreen.newInstance(
+              toggleTheme: () => context.read<ThemeCubit>().toggleTheme(),
+            ),
             '/main': (context) => const MainScreen(),
             '/pdf_reader': (context) {
               final args = ModalRoute.of(context)!.settings.arguments
@@ -160,14 +123,9 @@ class MyApp extends StatelessWidget {
                 userId: FirebaseAuth.instance.currentUser?.uid ?? '',
                 lastReadPage: (args['initialPage']?.toString() ?? '1'),
               );
-              final cubit = BlocProvider.of<LibraryCubit>(context);
-              return BlocProvider.value(
-                value: cubit,
-                child: PDFReaderScreen(
+              return PDFReaderScreen.newInstance(
                   book: book,
-                  initialPage: args['initialPage'] as int?,
-                ),
-              );
+                  initialPage: args['initialPage'] as int? ?? 1);
             },
             '/epub_reader': (context) {
               final args = ModalRoute.of(context)!.settings.arguments
@@ -180,13 +138,9 @@ class MyApp extends StatelessWidget {
                 userId: FirebaseAuth.instance.currentUser?.uid ?? '',
                 lastReadPage: '',
               );
-              final cubit = BlocProvider.of<LibraryCubit>(context);
-              return BlocProvider.value(
-                value: cubit,
-                child: EPUBReaderScreen(
-                  book: book,
-                  initialCfi: args['initialCfi'] as String?,
-                ),
+              return EPUBReaderScreen.newInstance(
+                book: book,
+                initialCfi: args['initialCfi'] as String?,
               );
             },
           },
@@ -209,14 +163,8 @@ class AuthGate extends StatelessWidget {
               body: Center(child: CircularProgressIndicator()));
         }
         if (snapshot.data == null) {
-          return MultiBlocProvider(
-            providers: [
-              BlocProvider.value(value: context.read<SettingCubit>()),
-              BlocProvider(create: (_) => SigninCubit()),
-            ],
-            child: SignInScreen(
-              toggleTheme: () => context.read<ThemeCubit>().toggleTheme(),
-            ),
+          return SignInScreen.newInstance(
+            toggleTheme: () => context.read<ThemeCubit>().toggleTheme(),
           );
         } else {
           return const MainScreen();
@@ -242,9 +190,9 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     _screens.addAll([
-      const LibraryScreen(),
-      const BookmarksScreen(),
-      const SettingsScreen(),
+      LibraryScreen.newInstance(),
+      BookmarksScreen.newInstance(),
+      SettingsScreen.newInstance(),
     ]);
   }
 

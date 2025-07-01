@@ -19,6 +19,11 @@ import 'bookmark_state.dart';
 class BookmarksScreen extends StatefulWidget {
   const BookmarksScreen({Key? key}) : super(key: key);
 
+  static Widget newInstance() => BlocProvider(
+    create: (context) => BookmarkCubit(),
+    child: const BookmarksScreen(),
+  );
+
   @override
   State<BookmarksScreen> createState() => _BookmarksScreenState();
 }
@@ -91,20 +96,18 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
       Navigator.push(
         context,
         PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) =>
-              PDFReaderScreen.withLibraryCubit(
-            context: context,
-            book: book,
-            openBookmarkPage: pageNum,
-            skipResumeDialog: true,
-          ),
+          pageBuilder: (context, animation, secondaryAnimation) => 
+              PDFReaderScreen.newInstance(
+                book: book,
+                openBookmarkPage: pageNum,
+                skipResumeDialog: true,
+              ),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return child;
           },
         ),
       );
     } else {
-      // EPUB: open reader, then open bookmark bottom sheet and navigate
       String? cfi;
       if (kDebugMode) {
         print('DEBUG: Bookmark location string: ${usedBookmark.location}');
@@ -122,8 +125,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
         context,
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) =>
-              EPUBReaderScreen.withLibraryCubit(
-            context: context,
+              EPUBReaderScreen.newInstance(
             book: book,
             skipResumeDialog: true,
             openBookmarkCfi: cfi,

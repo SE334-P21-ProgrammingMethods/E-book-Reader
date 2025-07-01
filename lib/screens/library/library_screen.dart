@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:io';
 
 // import '../database/mock_database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 // Will use LibraryCubit for book list
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,6 +22,15 @@ import 'library_cubit.dart';
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
+
+  static Widget newInstance() => BlocProvider(
+    create: (context) => LibraryCubit(
+      firestore: FirebaseFirestore.instance,
+      storage: FirebaseStorage.instance,
+      auth: FirebaseAuth.instance,
+    ),
+    child: const LibraryScreen(),
+  );
 
   @override
   State<LibraryScreen> createState() => _LibraryScreenState();

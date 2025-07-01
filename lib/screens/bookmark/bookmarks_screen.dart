@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,8 +20,19 @@ import 'bookmark_state.dart';
 class BookmarksScreen extends StatefulWidget {
   const BookmarksScreen({Key? key}) : super(key: key);
 
-  static Widget newInstance() => BlocProvider(
-    create: (context) => BookmarkCubit(),
+  static Widget newInstance() => MultiBlocProvider(
+    providers: [
+      BlocProvider(
+        create: (context) => BookmarkCubit(),
+      ),
+      BlocProvider(
+        create: (context) => LibraryCubit(
+          firestore: FirebaseFirestore.instance,
+          storage: FirebaseStorage.instance,
+          auth: FirebaseAuth.instance,
+        ),
+      ),
+    ],
     child: const BookmarksScreen(),
   );
 

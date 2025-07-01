@@ -44,14 +44,21 @@ class PDFReaderScreen extends StatefulWidget {
     int? openBookmarkPage,
     bool skipResumeDialog = false,
   }) {
-    return BlocProvider(
-      create: (context) => PdfReaderCubit(
-        book,
-        onSaveLastPage,
-        initialPage,
-        openBookmarkPage,
-        skipResumeDialog,
-      ),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => PdfReaderCubit(
+            book,
+            onSaveLastPage,
+            initialPage,
+            openBookmarkPage,
+            skipResumeDialog,
+          ),
+        ),
+        BlocProvider(
+          create: (context) => BookmarkCubit(),
+        ),
+      ],
       child: PDFReaderScreen(
         book: book,
         onSaveLastPage: onSaveLastPage,
@@ -295,165 +302,117 @@ class _PDFReaderScreen extends State<PDFReaderScreen>
                     onPressed: () async {
                       final user = FirebaseAuth.instance.currentUser;
                       if (user == null) return;
-                      final cubit = context.read<BookmarkCubit>();
-                      await cubit.loadBookmarks(widget.book.id);
-                      cubit.state.bookmarks
-                          .where((b) => b.bookId == widget.book.id)
-                          .toList();
+                      final bookmarkCubit = context.read<BookmarkCubit>();
+                      final pdfCubit = context.read<PdfReaderCubit>();
+                      await bookmarkCubit.loadBookmarks(widget.book.id);
+
                       if (!mounted) return;
-                      final parentBookmarkCubit = context.read<BookmarkCubit>();
+
                       showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
                         shape: const RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.vertical(top: Radius.circular(24)),
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
                         ),
-                        builder: (context) => Builder(
-                            builder: (modalContext) {
-                              return DraggableScrollableSheet(
-                                expand: false,
-                                initialChildSize: 0.3,
-                                minChildSize: 0.1,
-                                maxChildSize: 0.9,
-                                builder: (context, scrollController) {
-                                  return BlocBuilder<BookmarkCubit,BookmarkState>(
-                                    builder: (context, state) {
-                                      final cubit =
-                                          context.read<BookmarkCubit>();
-                                      if (!state.isLoading) {
-                                        cubit.loadBookmarks(widget.book.id);
-                                      }
-                                      final bookmarks = (state.bookmarks)
-                                          .where(
-                                              (b) => b.bookId == widget.book.id)
-                                          .toList();
-                                      return Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.all(16.0),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    'Bookmarks for "${widget.book.title}"',
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .titleLarge,
-                                                    maxLines: 2,
-                                                    softWrap: true,
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 8),
-                                                ElevatedButton.icon(
-                                                  icon: const Icon(Icons.add,
-                                                      size: 18),
-                                                  label: const Text('Add',
-                                                      overflow: TextOverflow
-                                                          .ellipsis),
-                                                  style:
-                                                      ElevatedButton.styleFrom(
-                                                          minimumSize:
-                                                              const Size(60,
-                                                                  36),
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .symmetric(
-                                                                  horizontal:
-                                                                      8)),
-                                                  onPressed: () async {
-                                                    final currentPage = context
-                                                        .read<PdfReaderCubit>()
-                                                        .state
-                                                        .currentPage;
-                                                    final newBookmark =
-                                                        Bookmark(
-                                                      bookId: widget.book.id,
-                                                      bookTitle:
-                                                          widget.book.title,
-                                                      location: currentPage
-                                                          .toString(),
-                                                    );
-                                                    await cubit.addBookmark(
-                                                        newBookmark);
-                                                    await cubit.loadBookmarks(
-                                                        widget.book.id);
-                                                    if (mounted) {
-                                                      ScaffoldMessenger.of(
-                                                              context)
-                                                          .showSnackBar(
-                                                        SnackBar(
-                                                            content: Text(
-                                                                'Bookmark added on page $currentPage')),
-                                                      );
-                                                    }
-                                                  },
-                                                ),
-                                              ],
+                        builder: (context) => MultiBlocProvider(
+                          providers: [
+                            BlocProvider<BookmarkCubit>.value(value: bookmarkCubit),
+                            BlocProvider<PdfReaderCubit>.value(value: pdfCubit),
+                          ],
+                          child: DraggableScrollableSheet(
+                            expand: false,
+                            initialChildSize: 0.3,
+                            minChildSize: 0.1,
+                            maxChildSize: 0.9,
+                            builder: (context, scrollController) {
+                              return BlocBuilder<BookmarkCubit, BookmarkState>(
+                                builder: (context, state) {
+                                  final cubit = context.read<BookmarkCubit>();
+                                  if (!state.isLoading) {
+                                    cubit.loadBookmarks(widget.book.id);
+                                  }
+                                  final bookmarks = state.bookmarks
+                                      .where((b) => b.bookId == widget.book.id)
+                                      .toList();
+                                  return Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(16.0),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                'Bookmarks for "${widget.book.title}"',
+                                                style: Theme.of(context).textTheme.titleLarge,
+                                                maxLines: 2,
+                                                softWrap: true,
+                                              ),
                                             ),
-                                          ),
-                                          Expanded(
-                                            child: bookmarks.isEmpty
-                                                ? const Center(
-                                                    child: Text(
-                                                        'No bookmarks yet.'))
-                                                : ListView.builder(
-                                                    controller:
-                                                        scrollController,
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                        horizontal: 12),
-                                                    itemCount: bookmarks.length,
-                                                    itemBuilder:
-                                                        (context, idx) {
-                                                      final bookmark =
-                                                          bookmarks[idx];
-                                                      return BookmarkCard(
-                                                        bookmark: bookmark,
-                                                        compact: true,
-                                                        onTap: () {
-                                                          Navigator.pop(
-                                                              context);
-                                                          _pdfController.jumpToPage(
-                                                              int.tryParse(bookmark
-                                                                      .location) ??
-                                                                  1);
-                                                        },
-                                                        onDelete: () async {
-                                                          await cubit
-                                                              .deleteBookmark(
-                                                                  bookmark);
-                                                          await cubit
-                                                              .loadBookmarks(
-                                                                  widget
-                                                                      .book.id);
-                                                          if (mounted) {
-                                                            Navigator.pop(
-                                                                context);
-                                                            ScaffoldMessenger
-                                                                    .of(context)
-                                                                .showSnackBar(
-                                                              const SnackBar(
-                                                                  content: Text(
-                                                                      'Bookmark deleted')),
-                                                            );
-                                                          }
-                                                        },
-                                                      );
-                                                        },
+                                            const SizedBox(width: 8),
+                                            ElevatedButton.icon(
+                                              icon: const Icon(Icons.add, size: 18),
+                                              label: const Text('Add', softWrap: true, maxLines: 1),
+                                              style: ElevatedButton.styleFrom(
+                                                  minimumSize: const Size(60, 36),
+                                                  padding: const EdgeInsets.symmetric(horizontal: 8)),
+                                              onPressed: () async {
+                                                final currentPage = context.read<PdfReaderCubit>().state.currentPage;
+                                                final newBookmark = Bookmark(
+                                                  bookId: widget.book.id,
+                                                  bookTitle: widget.book.title,
+                                                  location: currentPage.toString(),
+                                                );
+                                                await cubit.addBookmark(newBookmark);
+                                                await cubit.loadBookmarks(widget.book.id);
+                                                if (mounted) {
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    SnackBar(content: Text('Bookmark added on page $currentPage')),
+                                                  );
+                                                }
+                                              },
                                             ),
-                                          ),
-                                        ],
-                                      );
-                                    },
+                                          ],
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: bookmarks.isEmpty
+                                            ? const Center(child: Text('No bookmarks yet.'))
+                                            : ListView.builder(
+                                                controller: scrollController,
+                                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                                itemCount: bookmarks.length,
+                                                itemBuilder: (context, idx) {
+                                                  final bookmark = bookmarks[idx];
+                                                  return BookmarkCard(
+                                                    bookmark: bookmark,
+                                                    compact: true,
+                                                    onTap: () {
+                                                      Navigator.pop(context);
+                                                      final page = int.tryParse(bookmark.location) ?? 1;
+                                                      _pdfController.jumpToPage(page);
+                                                    },
+                                                    onDelete: () async {
+                                                      await cubit.deleteBookmark(bookmark);
+                                                      await cubit.loadBookmarks(widget.book.id);
+                                                      if (mounted) {
+                                                        Navigator.pop(context);
+                                                        ScaffoldMessenger.of(context).showSnackBar(
+                                                          const SnackBar(content: Text('Bookmark deleted')),
+                                                        );
+                                                      }
+                                                    },
+                                                  );
+                                                },
+                                              ),
+                                      ),
+                                    ],
                                   );
                                 },
                               );
                             },
+                          ),
                         ),
                       );
                     },
@@ -892,121 +851,122 @@ class _PDFReaderScreen extends State<PDFReaderScreen>
   }
 
   void _openBookmarkSheetAndJump(int page) async {
-    final parentBookmarkCubit = context.read<BookmarkCubit>();
+    final bookmarkCubit = context.read<BookmarkCubit>();
+    final pdfCubit = context.read<PdfReaderCubit>();
+    await bookmarkCubit.loadBookmarks(widget.book.id);
+    if (!mounted) return;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (context) => Builder(
-        builder: (context) => Builder(
-          builder: (modalContext) {
-            return DraggableScrollableSheet(
-              expand: false,
-              initialChildSize: 0.3,
-              minChildSize: 0.1,
-              maxChildSize: 0.9,
-              builder: (context, scrollController) {
-                return BlocBuilder<BookmarkCubit, BookmarkState>(
-                  builder: (context, state) {
-                    final cubit = context.read<BookmarkCubit>();
-                    if (!state.isLoading) {
-                      cubit.loadBookmarks(widget.book.id);
-                    }
-                    final bookmarks = (state.bookmarks)
-                        .where((b) => b.bookId == widget.book.id)
-                        .toList();
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  'Bookmarks for "${widget.book.title}"',
-                                  style: Theme.of(context).textTheme.titleLarge,
-                                  maxLines: 2,
-                                  softWrap: true,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              ElevatedButton.icon(
-                                icon: const Icon(Icons.add, size: 18),
-                                label: const Text('Add',
-                                    softWrap: true, maxLines: 1),
-                                style: ElevatedButton.styleFrom(
-                                    minimumSize: const Size(60, 36),
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8)),
-                                onPressed: () async {
-                                  final currentPage = context
-                                      .read<PdfReaderCubit>()
-                                      .state
-                                      .currentPage;
-                                  final newBookmark = Bookmark(
-                                    bookId: widget.book.id,
-                                    bookTitle: widget.book.title,
-                                    location: currentPage.toString(),
-                                  );
-                                  await cubit.addBookmark(newBookmark);
-                                  await cubit.loadBookmarks(widget.book.id);
-                                  if (mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                          content: Text(
-                                              'Bookmark added on page $currentPage')),
-                                    );
-                                  }
-                                },
-                              ),
-                            ],
+      builder: (bottomSheetContext) => BlocProvider<BookmarkCubit>.value(
+        value: bookmarkCubit,
+        child: DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.3,
+          minChildSize: 0.1,
+          maxChildSize: 0.9,
+          builder: (context, scrollController) {
+            return BlocBuilder<BookmarkCubit, BookmarkState>(
+              builder: (context, state) {
+                final cubit = context.read<BookmarkCubit>();
+                if (!state.isLoading) {
+                  cubit.loadBookmarks(widget.book.id);
+                }
+                final bookmarks = (state.bookmarks)
+                    .where((b) => b.bookId == widget.book.id)
+                    .toList();
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Bookmarks for "${widget.book.title}"',
+                              style: Theme.of(context).textTheme.titleLarge,
+                              maxLines: 2,
+                              softWrap: true,
+                            ),
                           ),
-                        ),
-                        Expanded(
-                          child: bookmarks.isEmpty
-                              ? const Center(child: Text('No bookmarks yet.'))
-                              : ListView.builder(
-                                  controller: scrollController,
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12),
-                                  itemCount: bookmarks.length,
-                                  itemBuilder: (context, idx) {
-                                    final bookmark = bookmarks[idx];
-                                    return BookmarkCard(
-                                      bookmark: bookmark,
-                                      compact: true,
-                                      onTap: () {
-                                        Navigator.pop(context);
-                                        final page =
-                                            int.tryParse(bookmark.location) ??
-                                                1;
-                                        _pdfController.jumpToPage(page);
-                                      },
-                                      onDelete: () async {
-                                        await cubit.deleteBookmark(bookmark);
-                                        await cubit
-                                            .loadBookmarks(widget.book.id);
-                                        if (mounted) {
-                                          Navigator.pop(context);
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            const SnackBar(
-                                                content:
-                                                    Text('Bookmark deleted')),
-                                          );
-                                        }
-                                      },
-                                    );
+                          const SizedBox(width: 8),
+                          ElevatedButton.icon(
+                            icon: const Icon(Icons.add, size: 18),
+                            label: const Text('Add',
+                                softWrap: true, maxLines: 1),
+                            style: ElevatedButton.styleFrom(
+                                minimumSize: const Size(60, 36),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8)),
+                            onPressed: () async {
+                              final currentPage = context
+                                  .read<PdfReaderCubit>()
+                                  .state
+                                  .currentPage;
+                              final newBookmark = Bookmark(
+                                bookId: widget.book.id,
+                                bookTitle: widget.book.title,
+                                location: currentPage.toString(),
+                              );
+                              await cubit.addBookmark(newBookmark);
+                              await cubit.loadBookmarks(widget.book.id);
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(
+                                          'Bookmark added on page $currentPage')),
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: bookmarks.isEmpty
+                          ? const Center(child: Text('No bookmarks yet.'))
+                          : ListView.builder(
+                              controller: scrollController,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12),
+                              itemCount: bookmarks.length,
+                              itemBuilder: (context, idx) {
+                                final bookmark = bookmarks[idx];
+                                return BookmarkCard(
+                                  bookmark: bookmark,
+                                  compact: true,
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    final page =
+                                        int.tryParse(bookmark.location) ??
+                                            1;
+                                    _pdfController.jumpToPage(page);
                                   },
-                                ),
-                        ),
-                      ],
-                    );
-                  },
+                                  onDelete: () async {
+                                    await cubit.deleteBookmark(bookmark);
+                                    await cubit
+                                        .loadBookmarks(widget.book.id);
+                                    if (mounted) {
+                                      Navigator.pop(context);
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                            content:
+                                                Text('Bookmark deleted')),
+                                      );
+                                    }
+                                  },
+                                );
+                              },
+                            ),
+                    ),
+                  ],
                 );
               },
             );

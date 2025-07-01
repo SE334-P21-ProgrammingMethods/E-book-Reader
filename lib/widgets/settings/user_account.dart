@@ -25,11 +25,15 @@ class _UserAccountState extends State<UserAccount> {
     String? errorText;
 
     void showResultDialog(String title, String message) {
+      final theme = Theme.of(context);
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text(title),
-          content: Text(message),
+          backgroundColor: theme.colorScheme.surface,
+          title: Text(title,
+              style: TextStyle(color: theme.colorScheme.onSurface)),
+          content: Text(message,
+              style: TextStyle(color: theme.colorScheme.onSurface)),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -60,7 +64,9 @@ class _UserAccountState extends State<UserAccount> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text('Account Info',
-                      style: Theme.of(context).textTheme.titleMedium),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      )),
                   const SizedBox(height: 16),
                   TextField(
                     controller: controller,
@@ -68,7 +74,14 @@ class _UserAccountState extends State<UserAccount> {
                       labelText: 'Username',
                       border: const OutlineInputBorder(),
                       errorText: errorText,
+                      labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+                      filled: true,
+                      fillColor: Theme.of(context).colorScheme.surface,
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+                      ),
                     ),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                     onChanged: (_) {
                       if (errorText != null) {
                         setState(() => errorText = null);
@@ -143,12 +156,16 @@ class _UserAccountState extends State<UserAccount> {
 
   void _showPasswordResetInfo(BuildContext context) async {
     await context.read<SettingCubit>().sendPasswordReset();
+    final theme = Theme.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Account Info'),
-        content: const Text(
-            'A password reset link will be sent to your email. Please check your inbox.'),
+        backgroundColor: theme.colorScheme.surface,
+        title: Text('Account Info',
+          style: TextStyle(color: theme.colorScheme.onSurface)),
+        content: Text(
+            'A password reset link will be sent to your email. Please check your inbox.',
+            style: TextStyle(color: theme.colorScheme.onSurface)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -325,12 +342,16 @@ class _UserAccountState extends State<UserAccount> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Text(name,
-                      style: theme.textTheme.titleLarge
-                          ?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(
+                    name,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onSurface
+                    )
+                  ),
                   const SizedBox(height: 8),
                   Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 70),
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
                     elevation: 2,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -340,20 +361,18 @@ class _UserAccountState extends State<UserAccount> {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                          vertical: 4, horizontal: 4),
-                      child: Row(
-                        children: [
-                          // Icon(Icons.email, color: theme.colorScheme.primary),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Center(
-                              child: Text(
-                                email,
-                                style: theme.textTheme.bodyMedium,
-                              ),
-                            ),
-                          ),
-                        ],
+                          vertical: 12, horizontal: 16),
+                      child: Text(
+                        email,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontSize: email.length > 30 ? 13 : null,
+                        ),
+                        textAlign: TextAlign.center,
+                        softWrap: true,
+                        overflow: TextOverflow.visible,
                       ),
                     ),
                   ),

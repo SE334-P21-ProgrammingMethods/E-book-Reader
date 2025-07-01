@@ -14,7 +14,10 @@ class ThemeSettings extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text('Dark Mode'),
+        Text(
+          'Dark Mode',
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+        ),
         IconSwitch(
           items: [
             IconSwitchItem(

@@ -67,10 +67,14 @@ class BookGridItem extends StatelessWidget {
                     padding: const EdgeInsets.all(4),
                     onSelected: (value) => onBookLongPress(book, value),
                     itemBuilder: (context) => [
-                      const PopupMenuItem(
-                          value: 'edit', child: Text('Rename')),
-                      const PopupMenuItem(
-                          value: 'delete', child: Text('Delete')),
+                      PopupMenuItem(
+                          value: 'edit',
+                          child: Text('Rename',
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface))),
+                      PopupMenuItem(
+                          value: 'delete',
+                          child: Text('Delete',
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface))),
                     ],
                   ),
                 ),

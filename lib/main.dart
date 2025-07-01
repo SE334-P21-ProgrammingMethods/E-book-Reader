@@ -40,9 +40,55 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ThemeCubit, ThemeState>(
       builder: (context, themeState) {
+        // Get the font size scale factor from ThemeCubit
+        final fontScale = context.read<ThemeCubit>().fontSizeScale;
+
+        // Create base theme with scaled text styles
+        final baseTextTheme = GoogleFonts.lobsterTextTheme(
+          Typography.englishLike2021,
+        )
+            .apply(
+          displayColor: Colors.white,
+          bodyColor: Colors.white,
+        );
+
+        final scaledTextTheme = baseTextTheme.copyWith(
+          displayLarge: baseTextTheme.displayLarge?.copyWith(
+              fontSize: baseTextTheme.displayLarge!.fontSize! * fontScale),
+          displayMedium: baseTextTheme.displayMedium?.copyWith(
+              fontSize: baseTextTheme.displayMedium!.fontSize! * fontScale),
+          displaySmall: baseTextTheme.displaySmall?.copyWith(
+              fontSize: baseTextTheme.displaySmall!.fontSize! * fontScale),
+          headlineLarge: baseTextTheme.headlineLarge?.copyWith(
+              fontSize: baseTextTheme.headlineLarge!.fontSize! * fontScale),
+          headlineMedium: baseTextTheme.headlineMedium?.copyWith(
+              fontSize: baseTextTheme.headlineMedium!.fontSize! * fontScale),
+          headlineSmall: baseTextTheme.headlineSmall?.copyWith(
+              fontSize: baseTextTheme.headlineSmall!.fontSize! * fontScale),
+          titleLarge: baseTextTheme.titleLarge?.copyWith(
+              fontSize: baseTextTheme.titleLarge!.fontSize! * fontScale),
+          titleMedium: baseTextTheme.titleMedium?.copyWith(
+              fontSize: baseTextTheme.titleMedium!.fontSize! * fontScale),
+          titleSmall: baseTextTheme.titleSmall?.copyWith(
+              fontSize: baseTextTheme.titleSmall!.fontSize! * fontScale),
+          bodyLarge: baseTextTheme.bodyLarge?.copyWith(
+              fontSize: baseTextTheme.bodyLarge!.fontSize! * fontScale),
+          bodyMedium: baseTextTheme.bodyMedium?.copyWith(
+              fontSize: baseTextTheme.bodyMedium!.fontSize! * fontScale),
+          bodySmall: baseTextTheme.bodySmall?.copyWith(
+              fontSize: baseTextTheme.bodySmall!.fontSize! * fontScale),
+          labelLarge: baseTextTheme.labelLarge?.copyWith(
+              fontSize: baseTextTheme.labelLarge!.fontSize! * fontScale),
+          labelMedium: baseTextTheme.labelMedium?.copyWith(
+              fontSize: baseTextTheme.labelMedium!.fontSize! * fontScale),
+          labelSmall: baseTextTheme.labelSmall?.copyWith(
+              fontSize: baseTextTheme.labelSmall!.fontSize! * fontScale),
+        );
+
         return MaterialApp(
           title: 'E-book Reader',
           theme: ThemeData(
+            textTheme: scaledTextTheme,
             colorScheme: const ColorScheme(
               brightness: Brightness.light,
               primary: Colors.black,
@@ -55,20 +101,9 @@ class MyApp extends StatelessWidget {
               onSurface: Colors.black,
             ),
             useMaterial3: true,
-            textTheme: GoogleFonts.lobsterTextTheme(
-              Typography.englishLike2021,
-            )
-                .apply(
-                  displayColor: Colors.black,
-                  bodyColor: Colors.black,
-                )
-                .copyWith(
-                  bodySmall: GoogleFonts.lobster(fontSize: 14),
-                  bodyMedium: GoogleFonts.lobster(fontSize: 16),
-                  bodyLarge: GoogleFonts.lobster(fontSize: 18),
-                ),
           ),
           darkTheme: ThemeData(
+            textTheme: scaledTextTheme,
             colorScheme: const ColorScheme(
               brightness: Brightness.dark,
               primary: Colors.white,
@@ -81,18 +116,6 @@ class MyApp extends StatelessWidget {
               onSurface: Colors.white,
             ),
             useMaterial3: true,
-            textTheme: GoogleFonts.lobsterTextTheme(
-              Typography.englishLike2021,
-            )
-                .apply(
-                  displayColor: Colors.white,
-                  bodyColor: Colors.white,
-                )
-                .copyWith(
-                  bodySmall: GoogleFonts.lobster(fontSize: 14),
-                  bodyMedium: GoogleFonts.lobster(fontSize: 16),
-                  bodyLarge: GoogleFonts.lobster(fontSize: 18),
-                ),
           ),
           themeMode: themeState.themeMode,
           localizationsDelegates: const [
@@ -174,8 +197,7 @@ class AuthGate extends StatelessWidget {
           return SignUpScreen.newInstance(
             toggleTheme: () => context.read<ThemeCubit>().toggleTheme(),
           );
-        }
-        else if (snapshot.hasData) {
+        } else if (snapshot.hasData) {
           return const MainScreen();
         }
 

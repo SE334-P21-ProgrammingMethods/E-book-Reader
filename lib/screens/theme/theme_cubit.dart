@@ -44,13 +44,13 @@ class ThemeCubit extends Cubit<ThemeState> {
   }
 
   static const double smallScale = 1.0;
-  static const double mediumScale = 1.5;
-  static const double largeScale = 2.0;
+  static const double mediumScale = 1.2;
+  static const double largeScale = 1.5;
 
   double get fontSizeScale {
     final fontSize = state.fontSize;
     if (fontSize <= 0) return smallScale;
-    if (fontSize >= 2) return largeScale;
+    if (fontSize >= 1.5) return largeScale;
     final scale = smallScale + (fontSize / 2) * (largeScale - smallScale);
     if (scale <= 0) return 1.0;
     return scale;

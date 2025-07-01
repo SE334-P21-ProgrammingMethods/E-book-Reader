@@ -92,6 +92,7 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
   String? _lastHighlightedCfi;
   bool _showFontSizeSlider = false;
   double _fontSize = 16.0;
+  double _baseFontSize = 16.0; // Base font size before scaling
   String? _selectedCfi;
   EpubDisplaySettings? _epubDisplaySettings;
   EpubTheme _epubTheme = EpubTheme.light();
@@ -108,6 +109,10 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
     final themeCubit = context.read<ThemeCubit>();
     final isDark = themeCubit.state.themeMode == ThemeMode.dark;
     _epubTheme = isDark ? EpubTheme.dark() : EpubTheme.light();
+
+    // Initialize font size with the app's scale factor
+    _baseFontSize = 16.0;
+    _fontSize = _baseFontSize * themeCubit.fontSizeScale;
 
     _prepareEpub();
 
@@ -224,20 +229,26 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
       }
       final shouldResume = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Resume Reading?'),
-          content: const Text('Resume reading from your last position?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Start at Beginning'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Resume'),
-            ),
-          ],
-        ),
+        builder: (context) {
+          final theme = Theme.of(context);
+          return AlertDialog(
+            backgroundColor: theme.colorScheme.surface,
+            title: Text('Resume Reading?',
+              style: TextStyle(color: theme.colorScheme.onSurface)),
+            content: Text('Resume reading from your last position?',
+              style: TextStyle(color: theme.colorScheme.onSurface)),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Start at Beginning'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Resume'),
+              ),
+            ],
+          );
+        },
       );
       if (shouldResume == true) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -408,6 +419,9 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
       );
     });
     _epubController?.updateTheme(theme: _epubTheme);
+
+    // Re-apply the font size to ensure it maintains the correct scale
+    _epubController?.setFontSize(fontSize: _fontSize);
   }
 
   void _openBookmarkSheetAndJump(String cfi) async {
@@ -460,7 +474,9 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
                             Expanded(
                               child: Text(
                                 'Bookmarks for "${widget.book.title}"',
-                                style: Theme.of(context).textTheme.titleLarge,
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurface,
+                                ),
                                 maxLines: 2,
                                 softWrap: true,
                               ),
@@ -653,7 +669,12 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
                                             'Bookmarks for "${widget.book.title}"',
                                             style: Theme.of(context)
                                                 .textTheme
-                                                .titleLarge,
+                                                .titleLarge
+                                                ?.copyWith(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurface,
+                                                ),
                                             maxLines: 2,
                                             softWrap: true,
                                           ),
@@ -821,21 +842,30 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
-                padding: EdgeInsets.all(16.0),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
                 child: Text('Table of Contents',
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface
+                    )),
               ),
               Expanded(
                 child: _chapters.isEmpty
-                    ? const Center(child: Text('No chapters'))
+                    ? Center(child: Text('No chapters',
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurface)))
                     : ListView.builder(
                         itemCount: _chapters.length,
                         itemBuilder: (context, idx) {
                           final chapter = _chapters[idx];
                           return ListTile(
-                            title: Text(chapter.title),
+                            title: Text(
+                              chapter.title,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface
+                              ),
+                            ),
                             onTap: () {
                               Navigator.of(context).maybePop();
                               _epubController?.display(cfi: chapter.href);
@@ -853,11 +883,14 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
-                padding: EdgeInsets.all(16.0),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
                 child: Text('Search',
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface
+                    )),
               ),
               Padding(
                 padding:
@@ -869,6 +902,7 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
                         controller: _searchController,
                         focusNode: _searchFocus,
                         textInputAction: TextInputAction.search,
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                         onSubmitted: (query) async {
                           if (query.trim().isEmpty) return;
                           setState(() {
@@ -894,7 +928,17 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
                         },
                         decoration: InputDecoration(
                           hintText: 'Search...',
-                          border: const OutlineInputBorder(),
+                          hintStyle: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                          ),
+                          filled: true,
+                          fillColor: Theme.of(context).colorScheme.surface,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                            ),
+                          ),
                           isDense: true,
                           contentPadding: const EdgeInsets.symmetric(
                               vertical: 8, horizontal: 12),
@@ -938,7 +982,8 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
                       return ListTile(
                         title: _highlightedExcerpt(
                             result.excerpt, _searchController.text),
-                        subtitle: Text(chapterTitle ?? ''),
+                        subtitle: Text(chapterTitle ?? '',
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                         onTap: () async {
                           Navigator.of(context).maybePop();
                           if (_lastHighlightedCfi != null) {
@@ -964,7 +1009,9 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
                   padding: const EdgeInsets.symmetric(
                       vertical: 8.0, horizontal: 16.0),
                   child: Text(_searchError,
-                      style: const TextStyle(color: Colors.red)),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error
+                      )),
                 ),
             ],
           ),
@@ -1019,7 +1066,10 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
                                                           ?.getChapters();
                                                   if (kDebugMode) {
                                                     print(chapters);
-                                                  } // Inspect for cfi or other properties
+                                                  }
+
+                                                  // Apply the font size when EPUB is loaded
+                                                  _epubController?.setFontSize(fontSize: _fontSize);
                                                 },
                                                 onRelocated: (value) async {
                                                   final location =
@@ -1208,7 +1258,9 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
                                                   },
                                           ),
                                           Text(
-                                              '${(_progress * 100).toStringAsFixed(2)}%'),
+                                              '${(_progress * 100).toStringAsFixed(2)}%',
+                                              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                                          ),
                                           IconButton(
                                             icon:
                                                 const Icon(Icons.chevron_right),

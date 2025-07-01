@@ -6,12 +6,14 @@ Future<bool?> showCustomDialog(
   String okLabel = 'OK',
   String cancelLabel = 'Cancel',
 }) async {
+  final theme = Theme.of(context);
   return showDialog<bool>(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text('Notification'),
-        content: Text(message),
+        backgroundColor: theme.colorScheme.surface,
+        title: Text('Notification', style: TextStyle(color: theme.colorScheme.onSurface)),
+        content: Text(message, style: TextStyle(color: theme.colorScheme.onSurface)),
         actions: <Widget>[
           TextButton(
             child: Text(cancelLabel),
@@ -37,6 +39,7 @@ Future<String?> showRenameDialog(
   required List<String> existingNames,
   required String originalExtension,
 }) async {
+  final theme = Theme.of(context);
   final dotIdx = originalName.lastIndexOf('.');
   final baseName =
       dotIdx > 0 ? originalName.substring(0, dotIdx) : originalName;
@@ -50,26 +53,53 @@ Future<String?> showRenameDialog(
       return StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            title: const Text('Duplicate File'),
+            backgroundColor: theme.colorScheme.surface,
+            title: Text('Duplicate File',
+              style: TextStyle(color: theme.colorScheme.onSurface)),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                    'A file with this name already exists. Please enter a new name:'),
+                Text(
+                  'A file with this name already exists. Please enter a new name:',
+                  style: TextStyle(color: theme.colorScheme.onSurface)),
                 const SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(
                       child: TextField(
                         controller: controller,
+                        style: TextStyle(color: theme.colorScheme.onSurface),
                         decoration: InputDecoration(
                           labelText: 'File name',
+                          labelStyle: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
+                          filled: true,
+                          fillColor: theme.colorScheme.surface,
                           errorText: errorText,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: theme.colorScheme.onSurface.withOpacity(0.3),
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: theme.colorScheme.onSurface.withOpacity(0.3),
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: theme.colorScheme.primary,
+                              width: 2,
+                            ),
+                          ),
                         ),
                         autofocus: true,
                       ),
                     ),
-                    Text(ext, style: Theme.of(context).textTheme.bodyMedium),
+                    Text(ext, style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface)),
                   ],
                 ),
               ],
@@ -121,6 +151,7 @@ Future<String?> showEditBookDialog(
   String originalName, {
   required List<String> existingNames,
 }) async {
+  final theme = Theme.of(context);
   // Find the last occurrence of .pdf or .epub
   final pdfIdx = originalName.toLowerCase().lastIndexOf('.pdf');
   final epubIdx = originalName.toLowerCase().lastIndexOf('.epub');
@@ -138,17 +169,45 @@ Future<String?> showEditBookDialog(
       return StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            title: const Text('Rename Book'),
+            backgroundColor: theme.colorScheme.surface,
+            title: Text('Rename Book',
+              style: TextStyle(color: theme.colorScheme.onSurface)),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('Enter a new name for the book:'),
+                Text(
+                  'Enter a new name for the book:',
+                  style: TextStyle(color: theme.colorScheme.onSurface)
+                ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: controller,
+                  style: TextStyle(color: theme.colorScheme.onSurface),
                   decoration: InputDecoration(
                     labelText: 'Book name',
+                    labelStyle: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
+                    filled: true,
+                    fillColor: theme.colorScheme.surface,
                     errorText: errorText,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: theme.colorScheme.onSurface.withOpacity(0.3),
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: theme.colorScheme.onSurface.withOpacity(0.3),
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: theme.colorScheme.primary,
+                        width: 2,
+                      ),
+                    ),
                   ),
                   autofocus: true,
                 ),
@@ -192,13 +251,15 @@ Future<void> showOkDialog(
   String title = 'Notification',
   String okLabel = 'OK',
 }) async {
+  final theme = Theme.of(context);
   return showDialog<void>(
     context: context,
     barrierDismissible: false,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text(title),
-        content: Text(message),
+        backgroundColor: theme.colorScheme.surface,
+        title: Text(title, style: TextStyle(color: theme.colorScheme.onSurface)),
+        content: Text(message, style: TextStyle(color: theme.colorScheme.onSurface)),
         actions: <Widget>[
           TextButton(
             child: Text(okLabel),
@@ -213,14 +274,18 @@ Future<void> showOkDialog(
 }
 
 Future<void> showEmailNotVerifiedDialog(BuildContext context) async {
+  final theme = Theme.of(context);
   return showDialog<void>(
     context: context,
     barrierDismissible: false,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text('Email Not Verified'),
-        content: const Text(
-            'Your email address is not verified. Please check your inbox and verify your email before signing in.'),
+        backgroundColor: theme.colorScheme.surface,
+        title: Text('Email Not Verified',
+          style: TextStyle(color: theme.colorScheme.onSurface)),
+        content: Text(
+            'Your email address is not verified. Please check your inbox and verify your email before signing in.',
+            style: TextStyle(color: theme.colorScheme.onSurface)),
         actions: <Widget>[
           TextButton(
             child: const Text('OK'),
@@ -235,14 +300,18 @@ Future<void> showEmailNotVerifiedDialog(BuildContext context) async {
 }
 
 Future<void> showPasswordPolicyDialog(BuildContext context) async {
+  final theme = Theme.of(context);
   return showDialog<void>(
     context: context,
     barrierDismissible: false,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text('Password Policy'),
-        content: const Text(
-            'Your password does not meet the latest security requirements. Please update your password in the settings.'),
+        backgroundColor: theme.colorScheme.surface,
+        title: Text('Password Policy',
+          style: TextStyle(color: theme.colorScheme.onSurface)),
+        content: Text(
+            'Your password does not meet the latest security requirements. Please update your password in the settings.',
+            style: TextStyle(color: theme.colorScheme.onSurface)),
         actions: <Widget>[
           TextButton(
             child: const Text('OK'),
@@ -257,14 +326,18 @@ Future<void> showPasswordPolicyDialog(BuildContext context) async {
 }
 
 Future<void> showResetPasswordSentDialog(BuildContext context) async {
+  final theme = Theme.of(context);
   return showDialog<void>(
     context: context,
     barrierDismissible: false,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text('Reset Password'),
-        content: const Text(
-            'A password reset link has been sent to your email. Please check your inbox.'),
+        backgroundColor: theme.colorScheme.surface,
+        title: Text('Reset Password',
+          style: TextStyle(color: theme.colorScheme.onSurface)),
+        content: Text(
+            'A password reset link has been sent to your email. Please check your inbox.',
+            style: TextStyle(color: theme.colorScheme.onSurface)),
         actions: <Widget>[
           TextButton(
             child: const Text('OK'),

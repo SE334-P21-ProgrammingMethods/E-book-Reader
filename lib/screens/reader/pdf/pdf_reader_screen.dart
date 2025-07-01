@@ -382,7 +382,9 @@ class _PDFReaderScreen extends State<PDFReaderScreen>
                                             Expanded(
                                               child: Text(
                                                 'Bookmarks for "${widget.book.title}"',
-                                                style: Theme.of(context).textTheme.titleLarge,
+                                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                                  color: Theme.of(context).colorScheme.onSurface,
+                                                ),
                                                 maxLines: 2,
                                                 softWrap: true,
                                               ),
@@ -762,9 +764,20 @@ class _PDFReaderScreen extends State<PDFReaderScreen>
                             flex: 6,
                             child: TextField(
                               controller: _searchController,
+                              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                               decoration: InputDecoration(
                                 hintText: 'Search',
-                                border: const OutlineInputBorder(),
+                                hintStyle: TextStyle(
+                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                ),
+                                filled: true,
+                                fillColor: Theme.of(context).colorScheme.surface,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                                  ),
+                                ),
                                 isDense: true,
                                 suffixIcon: state.searchText.isNotEmpty
                                     ? IconButton(
@@ -822,12 +835,15 @@ class _PDFReaderScreen extends State<PDFReaderScreen>
                 padding: const EdgeInsets.fromLTRB(24, 16, 16, 16),
                 child: Text(
                   'Table of Contents',
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                 ),
               ),
               Expanded(
                 child: _rootBookmark == null
-                    ? const Center(child: Text('No bookmarks'))
+                    ? Center(child: Text('No bookmarks',
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurface)))
                     : ListView(
                         children: _buildBookmarkList(_rootBookmark!),
                       ),
@@ -906,7 +922,9 @@ class _PDFReaderScreen extends State<PDFReaderScreen>
                           Expanded(
                             child: Text(
                               'Bookmarks for "${widget.book.title}"',
-                              style: Theme.of(context).textTheme.titleLarge,
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
                               maxLines: 2,
                               softWrap: true,
                             ),

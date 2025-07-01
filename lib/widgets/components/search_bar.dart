@@ -32,15 +32,34 @@ class SearchBar extends StatelessWidget {
         decoration: InputDecoration(
           prefixIcon: prefixIcon ?? const Icon(Icons.search),
           hintText: hintText,
+          hintStyle: TextStyle(
+            color: theme.colorScheme.onSurface.withOpacity(0.6),
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(24),
-            borderSide: BorderSide(color: borderColor ?? theme.dividerColor),
+            borderSide: BorderSide(
+              color: borderColor ?? theme.colorScheme.onSurface.withOpacity(0.3),
+            ),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(24),
+            borderSide: BorderSide(
+              color: borderColor ?? theme.colorScheme.onSurface.withOpacity(0.3),
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(24),
+            borderSide: BorderSide(
+              color: theme.colorScheme.primary,
+              width: 2,
+            ),
           ),
           filled: true,
           fillColor: fillColor ??
               theme.inputDecorationTheme.fillColor ??
               theme.colorScheme.surface,
         ),
+        style: TextStyle(color: theme.colorScheme.onSurface),
         onChanged: onChanged,
       ),
     );

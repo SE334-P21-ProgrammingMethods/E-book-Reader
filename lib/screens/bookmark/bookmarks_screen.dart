@@ -86,16 +86,21 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const AlertDialog(
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Preparing book...'),
-          ],
-        ),
-      ),
+      builder: (context) {
+        final theme = Theme.of(context);
+        return AlertDialog(
+          backgroundColor: theme.colorScheme.surface,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text('Preparing book...',
+                style: TextStyle(color: theme.colorScheme.onSurface)),
+            ],
+          ),
+        );
+      },
     );
     try {} finally {
       if (Navigator.of(context, rootNavigator: true).canPop()) {
@@ -253,8 +258,10 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
                                     Expanded(
                                       child: Text(
                                         '$displayTitle (${bookmarks.length})',
-                                        style: textTheme.titleMedium,
-                                        overflow: TextOverflow.ellipsis,
+                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                          color: Theme.of(context).colorScheme.onSurface,
+                                        ),
+                                        softWrap: true,
                                       ),
                                     ),
                                   ],

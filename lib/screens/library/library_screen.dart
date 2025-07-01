@@ -83,21 +83,27 @@ class _LibraryScreenState extends State<LibraryScreen>
     } else if (result == 'delete') {
       final confirmed = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Delete Book'),
-          content: const Text(
-              'Are you sure you want to delete this book? This action cannot be undone.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: Text(MaterialLocalizations.of(context).okButtonLabel),
-            ),
-          ],
-        ),
+        builder: (context) {
+          final theme = Theme.of(context);
+          return AlertDialog(
+            backgroundColor: theme.colorScheme.surface,
+            title: Text('Delete Book',
+              style: TextStyle(color: theme.colorScheme.onSurface)),
+            content: Text(
+                'Are you sure you want to delete this book? This action cannot be undone.',
+                style: TextStyle(color: theme.colorScheme.onSurface)),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(MaterialLocalizations.of(context).okButtonLabel),
+              ),
+            ],
+          );
+        },
       );
       if (confirmed == true) {
         await context.read<LibraryCubit>().deleteBook(book);
@@ -163,13 +169,15 @@ class _LibraryScreenState extends State<LibraryScreen>
               );
             }
           });
-          return const AlertDialog(
+          return AlertDialog(
+            backgroundColor: theme.colorScheme.surface,
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Downloading book...'),
+                const CircularProgressIndicator(),
+                const SizedBox(height: 16),
+                Text('Downloading book...',
+                  style: TextStyle(color: theme.colorScheme.onSurface)),
                 // ValueListenableBuilder<double>(
                 //   valueListenable: ValueNotifier(progress),
                 //   builder: (context, value, child) =>

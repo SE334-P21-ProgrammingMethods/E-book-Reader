@@ -105,7 +105,11 @@ class _SettingsScreenState extends State<SettingsScreen>
                                         'Font Size',
                                         style: Theme.of(context)
                                             .textTheme
-                                            .titleMedium,
+                                            .titleMedium?.copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurface,
+                                        ),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
@@ -138,7 +142,11 @@ class _SettingsScreenState extends State<SettingsScreen>
                                         'Theme',
                                         style: Theme.of(context)
                                             .textTheme
-                                            .titleMedium,
+                                            .titleMedium?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface,
+                                        ),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(

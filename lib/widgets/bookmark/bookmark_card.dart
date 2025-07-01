@@ -112,10 +112,15 @@ class BookmarkCard extends StatelessWidget {
                       if (!compact)
                         Text(bookmark.bookTitle,
                             style: textTheme.bodyLarge
-                                ?.copyWith(fontWeight: FontWeight.bold)),
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: colorScheme.onSurface,
+                                )),
                       Text(
                         displayText,
-                        style: textTheme.bodyMedium,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurface,
+                        ),
                       ),
                     ],
                   ),

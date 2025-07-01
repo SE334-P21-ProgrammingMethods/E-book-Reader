@@ -9,6 +9,8 @@ class FontSizeSettings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeState = context.watch<ThemeCubit>().state;
+    final themeCubit = context.read<ThemeCubit>();
+
     return Column(
       children: [
         Row(
@@ -41,7 +43,7 @@ class FontSizeSettings extends StatelessWidget {
           divisions: 2,
           label: _getFontSizeLabel(themeState.fontSize),
           onChanged: (double value) {
-            context.read<ThemeCubit>().setFontSize(value);
+            themeCubit.setFontSize(value);
           },
           activeColor: Theme.of(context).colorScheme.primary,
           inactiveColor: Theme.of(context).colorScheme.secondary,
@@ -53,13 +55,13 @@ class FontSizeSettings extends StatelessWidget {
   String _getFontSizeLabel(double size) {
     switch (size) {
       case 0:
-        return 'Small (1x)';
+        return 'Small (×1)';
       case 1:
-        return 'Medium (1.5x)';
+        return 'Medium (×1.2)';
       case 2:
-        return 'Large (2x)';
+        return 'Large (×1.5)';
       default:
-        return 'Medium (1.5x)';
+        return 'Small (×1)';
     }
   }
 }

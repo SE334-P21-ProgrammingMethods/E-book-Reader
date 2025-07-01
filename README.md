@@ -6,7 +6,7 @@
 
 A modern, feature-rich e-book reader application built with Flutter for **SE334.P21 - Programming Methods** course. Experience seamless reading across all your devices with cloud synchronization, customizable themes, and support for multiple e-book formats.
 
-![Platform Support](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web%20%7C%20Windows%20%7C%20macOS-blue)
+![Platform Support](https://img.shields.io/badge/Platform-Android-blue)
 
 ## ✨ Features
 
@@ -61,13 +61,13 @@ A modern, feature-rich e-book reader application built with Flutter for **SE334.
 - **Location Sync**: Bookmarks available across all devices
 - **Reading History**: Track your reading journey
 
-### 🌐 **Multi-platform Support**
+### 📱 **Platform Support**
 
-- **Android**: Native Android app experience
-- **iOS**: Full iOS integration with platform conventions
-- **Web**: Progressive Web App (PWA) support
-- **Windows**: Desktop application for Windows 10/11
-- **macOS**: Native macOS desktop experience
+- **Android**: Native Android app experience with Material Design 3
+- **Optimized Performance**: Smooth scrolling and fast page rendering
+- **Android Permissions**: Proper file access and storage handling
+- **Native Integration**: Follows Android platform conventions
+- **Responsive Design**: Adapts to various Android screen sizes
 
 ## 🛠️ Technology Stack
 
@@ -99,12 +99,6 @@ A modern, feature-rich e-book reader application built with Flutter for **SE334.
 - **SharedPreferences**: Local data persistence
 - **File Picker**: System file selection
 - **Image Picker**: Profile picture and image handling
-- **Permission Handler**: System permissions management
-- **UUID**: Unique identifier generation
-
-## 📱 Screenshots
-
-_Coming Soon - App screenshots showcasing the beautiful interface and features_
 
 ## 🚀 Getting Started
 
@@ -117,7 +111,33 @@ _Coming Soon - App screenshots showcasing the beautiful interface and features_
 
 ### Installation
 
+### **For Normal Users (APK Installation)**
 
+If you're not a developer and just want to use the app:
+
+1. **Download the APK**
+   - Go to the [Releases](https://github.com/your-username/ebook-reader/releases) page
+   - Download the latest APK file
+
+2. **Enable Unknown Sources**
+   - Go to **Settings** > **Security** (or **Privacy**)
+   - Enable **"Install unknown apps"** or **"Unknown sources"**
+   - This allows installation of apps outside Google Play Store
+
+3. **Install the APK**
+   - Open the downloaded APK file
+   - Tap **"Install"** when prompted
+   - Wait for installation to complete
+   - Tap **"Open"** to launch the app
+
+4. **First Time Setup**
+   - Create an account or sign in with Google
+   - Grant necessary permissions when prompted
+   - Start adding and reading your e-books!
+
+**Note**: The app requires internet connection for authentication and cloud sync features.
+
+### **For Developers**
 
 1. **Clone the repository**
 
@@ -170,7 +190,6 @@ The app requires the following Firebase services:
 
 - **PDF**: Full support with search, bookmarks, and navigation
 - **EPUB**: Reflowable text with customizable display
-- **File Size**: Optimized for files up to 100MB
 
 ## 🏗️ Architecture
 

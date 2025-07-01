@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:ebook_reader/screens/reader/pdf/pdf_reader_cubit.dart';
+import 'package:ebook_reader/screens/reader/pdf/pdf_reader_state.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,15 +12,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
-import '../bloc/bookmark/bookmark_cubit.dart';
-import '../bloc/bookmark/bookmark_state.dart';
-import '../bloc/reader/pdf/pdf_reader_cubit.dart';
-import '../bloc/reader/pdf/pdf_reader_state.dart';
-import '../bloc/theme/theme_cubit.dart';
-import '../models/book.dart';
-import '../models/bookmark.dart';
-import '../widgets/bookmark/bookmark_card.dart';
-import '../widgets/components/dialog_utils.dart';
+import '../../../models/book.dart';
+import '../../../models/bookmark.dart';
+import '../../../widgets/bookmark/bookmark_card.dart';
+import '../../../widgets/components/dialog_utils.dart';
+import '../../bookmark/bookmark_cubit.dart';
+import '../../bookmark/bookmark_state.dart';
+import '../../theme/theme_cubit.dart';
 
 const String kPdfPlaceholderAsset = 'lib/assets/pdf-placeholder.webp';
 
@@ -38,7 +38,7 @@ class PDFReaderScreen extends StatelessWidget {
       this.skipResumeDialog = false})
       : super(key: key);
 
-  static Widget withBookCubit({
+  static Widget withLibraryCubit({
     required BuildContext context,
     required Book book,
     Future<void> Function(String bookId, String lastReadPage)? onSaveLastPage,
@@ -331,8 +331,7 @@ class _PDFReaderScreenBodyState extends State<_PDFReaderScreenBody>
                                 minChildSize: 0.1,
                                 maxChildSize: 0.9,
                                 builder: (context, scrollController) {
-                                  return BlocBuilder<BookmarkCubit,
-                                      BookmarkState>(
+                                  return BlocBuilder<BookmarkCubit,BookmarkState>(
                                     builder: (context, state) {
                                       final cubit =
                                           context.read<BookmarkCubit>();

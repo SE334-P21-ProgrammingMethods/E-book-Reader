@@ -48,7 +48,7 @@ app.*.map.json
 .env
 
 # Firebase configuration
-google-services.json
+android/app/google-services.json
 
 # Android/IntelliJ
 .gradle

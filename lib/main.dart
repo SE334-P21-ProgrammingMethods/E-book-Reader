@@ -1,5 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:ebook_reader/screens/signup_screen.dart';
+import 'package:ebook_reader/screens/auth/forget-password/forget_password_cubit.dart';
+import 'package:ebook_reader/screens/auth/sign-in/signin_cubit.dart';
+import 'package:ebook_reader/screens/auth/sign-up/signup_cubit.dart';
+import 'package:ebook_reader/screens/auth/sign-up/signup_screen.dart';
+import 'package:ebook_reader/screens/bookmark/bookmark_cubit.dart';
+import 'package:ebook_reader/screens/library/library_cubit.dart';
+import 'package:ebook_reader/screens/library/library_screen.dart';
+import 'package:ebook_reader/screens/reader/pdf/pdf_reader_cubit.dart';
+import 'package:ebook_reader/screens/setting/setting_cubit.dart';
+import 'package:ebook_reader/screens/theme/theme_cubit.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -8,22 +17,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'bloc/auth/forget-password/forget_password_cubit.dart';
-import 'bloc/auth/sign-in/signin_cubit.dart';
-import 'bloc/auth/sign-up/signup_cubit.dart';
-import 'bloc/book/book_cubit.dart';
-import 'bloc/bookmark/bookmark_cubit.dart';
-import 'bloc/reader/pdf/pdf_reader_cubit.dart';
-import 'bloc/theme/theme_cubit.dart';
-import 'bloc/user/user_cubit.dart';
 import 'models/book.dart';
-import 'screens/bookmarks_screen.dart';
-import 'screens/epub_reader_screen.dart';
-import 'screens/forget_password_screen.dart';
-import 'screens/library_screen.dart';
-import 'screens/pdf_reader_screen.dart';
-import 'screens/settings_screen.dart';
-import 'screens/signin_screen.dart';
+import 'screens/bookmark/bookmarks_screen.dart';
+import 'screens/reader/epub/epub_reader_screen.dart';
+import 'screens/auth/forget-password/forget_password_screen.dart';
+import 'screens/reader/pdf/pdf_reader_screen.dart';
+import 'screens/setting/settings_screen.dart';
+import 'screens/auth/sign-in/signin_screen.dart';
 import 'widgets/navigation/bottom_nav.dart';
 
 void main() async {
@@ -38,11 +38,11 @@ void main() async {
     MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => ThemeCubit()),
-        BlocProvider(create: (_) => UserCubit()),
+        BlocProvider(create: (_) => SettingCubit()),
         BlocProvider(create: (_) => BookmarkCubit()),
         BlocProvider(create: (_) => PdfReaderCubit()),
         BlocProvider(
-          create: (_) => BookCubit(
+          create: (_) => LibraryCubit(
             firestore: FirebaseFirestore.instance,
             storage: FirebaseStorage.instance,
             auth: FirebaseAuth.instance,
@@ -141,7 +141,7 @@ class MyApp extends StatelessWidget {
                 ),
             '/sign-in': (context) => MultiBlocProvider(
                   providers: [
-                    BlocProvider.value(value: context.read<UserCubit>()),
+                    BlocProvider.value(value: context.read<SettingCubit>()),
                     BlocProvider(create: (_) => SigninCubit()),
                   ],
                   child: SignInScreen(
@@ -160,7 +160,7 @@ class MyApp extends StatelessWidget {
                 userId: FirebaseAuth.instance.currentUser?.uid ?? '',
                 lastReadPage: (args['initialPage']?.toString() ?? '1'),
               );
-              final cubit = BlocProvider.of<BookCubit>(context);
+              final cubit = BlocProvider.of<LibraryCubit>(context);
               return BlocProvider.value(
                 value: cubit,
                 child: PDFReaderScreen(
@@ -180,7 +180,7 @@ class MyApp extends StatelessWidget {
                 userId: FirebaseAuth.instance.currentUser?.uid ?? '',
                 lastReadPage: '',
               );
-              final cubit = BlocProvider.of<BookCubit>(context);
+              final cubit = BlocProvider.of<LibraryCubit>(context);
               return BlocProvider.value(
                 value: cubit,
                 child: EPUBReaderScreen(
@@ -211,7 +211,7 @@ class AuthGate extends StatelessWidget {
         if (snapshot.data == null) {
           return MultiBlocProvider(
             providers: [
-              BlocProvider.value(value: context.read<UserCubit>()),
+              BlocProvider.value(value: context.read<SettingCubit>()),
               BlocProvider(create: (_) => SigninCubit()),
             ],
             child: SignInScreen(

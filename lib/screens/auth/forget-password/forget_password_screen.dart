@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../bloc/auth/forget-password/forget_password_cubit.dart';
-import '../bloc/auth/forget-password/forget_password_state.dart';
-import '../widgets/components/dialog_utils.dart';
+import '../../../widgets/components/dialog_utils.dart';
+import 'forget_password_cubit.dart';
+import 'forget_password_state.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   final Function toggleTheme;

@@ -1,11 +1,11 @@
+import 'package:ebook_reader/screens/setting/setting_cubit.dart';
+import 'package:ebook_reader/screens/setting/setting_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../bloc/user/user_cubit.dart';
-import '../bloc/user/user_state.dart';
-import '../widgets/settings/font_size_settings.dart';
-import '../widgets/settings/theme_settings.dart';
-import '../widgets/settings/user_account.dart';
+import '../../widgets/settings/font_size_settings.dart';
+import '../../widgets/settings/theme_settings.dart';
+import '../../widgets/settings/user_account.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -158,8 +158,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                         ),
                         // Account Tab
                         BlocProvider(
-                          create: (_) => UserCubit()..fetchUser(),
-                          child: BlocListener<UserCubit, UserState>(
+                          create: (_) => SettingCubit()..fetchUser(),
+                          child: BlocListener<SettingCubit, SettingState>(
                             listener: (context, state) {
                               if (state is UserLoggedOut || state.isLoggedOut) {
                                 Navigator.pushNamedAndRemoveUntil(

@@ -10,17 +10,17 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../models/book.dart';
 
-part 'book_state.dart';
+part 'library_state.dart';
 
-class BookCubit extends Cubit<BookState> {
+class LibraryCubit extends Cubit<LibraryState> {
   final FirebaseFirestore firestore;
   final FirebaseStorage storage;
   final FirebaseAuth auth;
-  BookCubit({
+  LibraryCubit({
     required this.firestore,
     required this.storage,
     required this.auth,
-  }) : super(const BookState());
+  }) : super(const LibraryState());
 
   // Listen to books for current user
   Stream<void> listenToBooks() {

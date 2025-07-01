@@ -6,10 +6,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-import 'user_state.dart';
+import 'setting_state.dart';
 
-class UserCubit extends Cubit<UserState> {
-  UserCubit() : super(const UserState());
+class SettingCubit extends Cubit<SettingState> {
+  SettingCubit() : super(const SettingState());
 
   Future<void> fetchUser() async {
     emit(state.copyWith(isLoading: true, error: null));

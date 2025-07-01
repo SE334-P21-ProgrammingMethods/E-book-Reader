@@ -11,13 +11,13 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../bloc/book/book_cubit.dart';
-import '../bloc/bookmark/bookmark_cubit.dart';
-import '../bloc/bookmark/bookmark_state.dart';
-import '../bloc/theme/theme_cubit.dart';
-import '../models/book.dart';
-import '../models/bookmark.dart';
-import '../widgets/bookmark/bookmark_card.dart';
+import '../../../models/book.dart';
+import '../../../models/bookmark.dart';
+import '../../../widgets/bookmark/bookmark_card.dart';
+import '../../bookmark/bookmark_cubit.dart';
+import '../../bookmark/bookmark_state.dart';
+import '../../library/library_cubit.dart';
+import '../../theme/theme_cubit.dart';
 
 class EPUBReaderScreen extends StatefulWidget {
   final Book book;
@@ -35,7 +35,7 @@ class EPUBReaderScreen extends StatefulWidget {
       this.openBookmarkCfi})
       : super(key: key);
 
-  static Widget withBookCubit({
+  static Widget withLibraryCubit({
     required BuildContext context,
     required Book book,
     Future<void> Function(String bookId, String lastReadPage)?
@@ -44,7 +44,7 @@ class EPUBReaderScreen extends StatefulWidget {
     bool skipResumeDialog = false,
     String? openBookmarkCfi,
   }) {
-    final cubit = BlocProvider.of<BookCubit>(context);
+    final cubit = BlocProvider.of<LibraryCubit>(context);
     return BlocProvider.value(
       value: cubit,
       child: EPUBReaderScreen(
@@ -139,7 +139,7 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
           }
         } catch (_) {}
         // Also update Firestore lastReadPage with the CFI string only
-        final cubit = context.read<BookCubit>();
+        final cubit = context.read<LibraryCubit>();
         await cubit.updateLastReadPage(
             bookId: widget.book.id, lastReadPage: cfiString);
       }
@@ -173,7 +173,7 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
       await widget.onSaveLastProgress!(widget.book.id, cfi);
     }
     // Also update Firestore lastReadPage with the CFI string only
-    final cubit = context.read<BookCubit>();
+    final cubit = context.read<LibraryCubit>();
     await cubit.updateLastReadPage(
         bookId: widget.book.id, lastReadPage: cfiString);
   }

@@ -5,18 +5,18 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-// Will use BookCubit for book list
+// Will use LibraryCubit for book list
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../bloc/book/book_cubit.dart';
-import '../models/book.dart';
-import '../widgets/components/dialog_utils.dart';
-import '../widgets/components/icon_switch.dart';
-import '../widgets/components/search_bar.dart' as components;
-import '../widgets/library/book_grid.dart';
-import '../widgets/library/book_list.dart';
-import 'epub_reader_screen.dart';
-import 'pdf_reader_screen.dart';
+import '../../models/book.dart';
+import '../../widgets/components/dialog_utils.dart';
+import '../../widgets/components/icon_switch.dart';
+import '../../widgets/components/search_bar.dart' as components;
+import '../../widgets/library/book_grid.dart';
+import '../../widgets/library/book_list.dart';
+import '../reader/epub/epub_reader_screen.dart';
+import '../reader/pdf/pdf_reader_screen.dart';
+import 'library_cubit.dart';
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
@@ -40,7 +40,7 @@ class _LibraryScreenState extends State<LibraryScreen>
       setState(() {});
     });
     // Listen to books
-    final cubit = context.read<BookCubit>();
+    final cubit = context.read<LibraryCubit>();
     _booksSubscription = cubit.listenToBooks().listen((_) {});
   }
 
@@ -56,7 +56,7 @@ class _LibraryScreenState extends State<LibraryScreen>
     final userId = FirebaseAuth.instance.currentUser?.uid;
     if (book.userId != userId) return; // Only allow CRUD for own books
     if (result == 'edit') {
-      final books = context.read<BookCubit>().state.books;
+      final books = context.read<LibraryCubit>().state.books;
       final existingNames =
           books.where((b) => b.id != book.id).map((b) => b.title).toList();
       final newName = await showEditBookDialog(
@@ -66,7 +66,7 @@ class _LibraryScreenState extends State<LibraryScreen>
       );
       if (newName != null && newName != book.title) {
         await context
-            .read<BookCubit>()
+            .read<LibraryCubit>()
             .updateBook(book: book, newTitle: newName);
       }
     } else if (result == 'delete') {
@@ -89,7 +89,7 @@ class _LibraryScreenState extends State<LibraryScreen>
         ),
       );
       if (confirmed == true) {
-        await context.read<BookCubit>().deleteBook(book);
+        await context.read<LibraryCubit>().deleteBook(book);
       }
     }
   }
@@ -97,10 +97,10 @@ class _LibraryScreenState extends State<LibraryScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    void _handleBookMenu(Book book, [String? action]) =>
+    void handleBookMenu(Book book, [String? action]) =>
         _showBookMenu(context, book, action);
-    void _handleBookTap(Book book) async {
-      final cubit = context.read<BookCubit>();
+    void handleBookTap(Book book) async {
+      final cubit = context.read<LibraryCubit>();
       if (!mounted) return;
       showDialog(
         context: context,
@@ -163,7 +163,7 @@ class _LibraryScreenState extends State<LibraryScreen>
       );
     }
 
-    return BlocListener<BookCubit, BookState>(
+    return BlocListener<LibraryCubit, LibraryState>(
       listenWhen: (previous, current) =>
           previous.isLoading != current.isLoading,
       listener: (context, state) async {
@@ -217,13 +217,13 @@ class _LibraryScreenState extends State<LibraryScreen>
                                   return;
                                 }
                                 Future<void> tryAddBook(String fileName) async {
-                                  await context.read<BookCubit>().addBook(
+                                  await context.read<LibraryCubit>().addBook(
                                         file: File(file.path!),
                                         format: file.extension!.toUpperCase(),
                                         userId: userId,
                                         onDuplicate: (msg) async {
                                           final books = context
-                                              .read<BookCubit>()
+                                              .read<LibraryCubit>()
                                               .state
                                               .books;
                                           final existingNames = books
@@ -316,7 +316,7 @@ class _LibraryScreenState extends State<LibraryScreen>
                 child: Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: BlocBuilder<BookCubit, BookState>(
+                  child: BlocBuilder<LibraryCubit, LibraryState>(
                     builder: (context, state) {
                       final books = state.books;
                       return TabBarView(
@@ -326,14 +326,14 @@ class _LibraryScreenState extends State<LibraryScreen>
                               ? BookGrid(
                                   books: books,
                                   searchQuery: _searchQuery,
-                                  onBookClick: _handleBookTap,
-                                  onBookLongPress: _handleBookMenu,
+                                  onBookClick: handleBookTap,
+                                  onBookLongPress: handleBookMenu,
                                 )
                               : BookList(
                                   books: books,
                                   searchQuery: _searchQuery,
-                                  onBookClick: _handleBookTap,
-                                  onBookLongPress: _handleBookMenu,
+                                  onBookClick: handleBookTap,
+                                  onBookLongPress: handleBookMenu,
                                 ),
                           _viewMode == 'grid'
                               ? BookGrid(
@@ -342,8 +342,8 @@ class _LibraryScreenState extends State<LibraryScreen>
                                           b.format.toUpperCase() == 'EPUB')
                                       .toList(),
                                   searchQuery: _searchQuery,
-                                  onBookClick: _handleBookTap,
-                                  onBookLongPress: _handleBookMenu,
+                                  onBookClick: handleBookTap,
+                                  onBookLongPress: handleBookMenu,
                                 )
                               : BookList(
                                   books: books
@@ -351,8 +351,8 @@ class _LibraryScreenState extends State<LibraryScreen>
                                           b.format.toUpperCase() == 'EPUB')
                                       .toList(),
                                   searchQuery: _searchQuery,
-                                  onBookClick: _handleBookTap,
-                                  onBookLongPress: _handleBookMenu,
+                                  onBookClick: handleBookTap,
+                                  onBookLongPress: handleBookMenu,
                                 ),
                           _viewMode == 'grid'
                               ? BookGrid(
@@ -361,8 +361,8 @@ class _LibraryScreenState extends State<LibraryScreen>
                                           b.format.toUpperCase() == 'PDF')
                                       .toList(),
                                   searchQuery: _searchQuery,
-                                  onBookClick: _handleBookTap,
-                                  onBookLongPress: _handleBookMenu,
+                                  onBookClick: handleBookTap,
+                                  onBookLongPress: handleBookMenu,
                                 )
                               : BookList(
                                   books: books
@@ -370,8 +370,8 @@ class _LibraryScreenState extends State<LibraryScreen>
                                           b.format.toUpperCase() == 'PDF')
                                       .toList(),
                                   searchQuery: _searchQuery,
-                                  onBookClick: _handleBookTap,
-                                  onBookLongPress: _handleBookMenu,
+                                  onBookClick: handleBookTap,
+                                  onBookLongPress: handleBookMenu,
                                 ),
                         ],
                       );

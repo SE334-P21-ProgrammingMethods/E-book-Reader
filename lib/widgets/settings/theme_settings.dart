@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../bloc/theme/theme_cubit.dart';
+import '../../screens/theme/theme_cubit.dart';
 import '../components/icon_switch.dart';
 
 class ThemeSettings extends StatelessWidget {

@@ -1,53 +1,42 @@
+import 'package:ebook_reader/screens/auth/sign-in/signin_cubit.dart';
+import 'package:ebook_reader/screens/auth/sign-in/signin_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../bloc/auth/sign-up/signup_cubit.dart';
-import '../bloc/auth/sign-up/signup_state.dart';
-import '../widgets/components/dialog_utils.dart';
+import '../../../widgets/components/dialog_utils.dart';
 
-class SignUpScreen extends StatefulWidget {
+class SignInScreen extends StatefulWidget {
   final Function toggleTheme;
 
-  const SignUpScreen({super.key, required this.toggleTheme});
+  const SignInScreen({super.key, required this.toggleTheme});
 
   @override
-  State<SignUpScreen> createState() => _SignUpScreenState();
+  State<SignInScreen> createState() => _SignInScreenState();
 }
 
-class _SignUpScreenState extends State<SignUpScreen> {
-  final _nameController = TextEditingController();
+class _SignInScreenState extends State<SignInScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
   String? _errorMessage;
   bool _isLoading = false;
   bool _showPassword = false;
-  bool _showConfirmPassword = false;
 
   @override
   void dispose() {
-    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
-    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  void _handleSignUp() {
-    setState(() {
-      _errorMessage = null;
-    });
-    if (_passwordController.text != _confirmPasswordController.text) {
-      setState(() {
-        _errorMessage = "Passwords do not match";
-      });
-      return;
-    }
-    context.read<SignupCubit>().signUp(
-          name: _nameController.text.trim(),
+  void _handleSignIn() {
+    context.read<SigninCubit>().signInWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
+  }
+
+  void _handleGoogleSignIn() {
+    context.read<SigninCubit>().signInWithGoogle();
   }
 
   @override
@@ -55,29 +44,38 @@ class _SignUpScreenState extends State<SignUpScreen> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return BlocListener<SignupCubit, SignupState>(
+    return BlocListener<SigninCubit, SigninState>(
       listener: (context, state) async {
-        if (state is SignupLoading) {
+        if (state is SigninLoading) {
           setState(() {
             _isLoading = true;
+            _errorMessage = null;
           });
-        } else if (state is SignupSuccess) {
-          setState(() {
-            _isLoading = false;
-          });
-          await showOkDialog(
-            context,
-            'A verification email has been sent to your registered email address. Please verify your email before signing in.',
-            title: 'Verify Your Email',
-            okLabel: 'OK',
-          );
-          Navigator.pushNamedAndRemoveUntil(
-              context, '/sign-in', (route) => false);
-        } else if (state is SignupFailure) {
+        } else if (state is SigninFailure) {
           setState(() {
             _isLoading = false;
             _errorMessage = state.error;
           });
+        } else if (state is SigninSuccess) {
+          setState(() {
+            _isLoading = false;
+            _errorMessage = null;
+          });
+          Navigator.pushNamedAndRemoveUntil(context, '/main', (route) => false);
+        } else if (state is SigninNotVerified) {
+          setState(() {
+            _isLoading = false;
+            _errorMessage = null;
+          });
+          await showEmailNotVerifiedDialog(context);
+        } else if (state is SigninPasswordPolicyWarning) {
+          setState(() {
+            _isLoading = false;
+            _errorMessage = null;
+          });
+          await showPasswordPolicyDialog(context);
+          Navigator.pushNamedAndRemoveUntil(
+              context, '/settings', (route) => false);
         }
       },
       child: Scaffold(
@@ -93,7 +91,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Create Account',
+                        'Sign In',
                         style: Theme.of(context)
                             .textTheme
                             .headlineMedium
@@ -113,13 +111,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 24),
                   Icon(
-                    Icons.person_add_outlined,
+                    Icons.book_outlined,
                     size: 64,
                     color: colorScheme.primary,
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'Join E-Book Reader to access your books anywhere',
+                    'Welcome back to E-Book Reader',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: colorScheme.onSurface.withValues(alpha: 0.7),
@@ -142,72 +140,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                     ),
                   if (_errorMessage != null) const SizedBox(height: 16),
-                  GestureDetector(
-                    onTap: () => FocusScope.of(context).unfocus(),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Full Name',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: colorScheme.onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.1),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: TextField(
-                            controller: _nameController,
-                            decoration: InputDecoration(
-                              hintText: 'Your name',
-                              hintStyle: const TextStyle(
-                                color: Colors.grey,
-                              ),
-                              filled: true,
-                              fillColor: Colors.transparent,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(
-                                  color:
-                                      colorScheme.brightness == Brightness.dark
-                                          ? Colors.white.withValues(alpha: 0.7)
-                                          : Colors.grey.withValues(alpha: 0.3),
-                                ),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(
-                                  color:
-                                      colorScheme.brightness == Brightness.dark
-                                          ? Colors.white.withValues(alpha: 0.7)
-                                          : Colors.grey.withValues(alpha: 0.3),
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(
-                                    color: colorScheme.brightness ==
-                                            Brightness.dark
-                                        ? Colors.white
-                                        : Colors.grey),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
                   GestureDetector(
                     onTap: () => FocusScope.of(context).unfocus(),
                     child: Column(
@@ -280,12 +212,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Password',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: colorScheme.onSurface,
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Password',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.onSurface,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pushNamed(
+                                    context, '/forgot-password');
+                              },
+                              child: const Text('Forgot password?'),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 8),
                         Container(
@@ -351,91 +295,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  GestureDetector(
-                    onTap: () => FocusScope.of(context).unfocus(),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Confirm Password',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: colorScheme.onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.1),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: TextField(
-                            controller: _confirmPasswordController,
-                            obscureText: !_showConfirmPassword,
-                            decoration: InputDecoration(
-                              hintText: '••••••••',
-                              hintStyle: const TextStyle(
-                                color: Colors.grey,
-                              ),
-                              filled: true,
-                              fillColor: Colors.transparent,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(
-                                  color:
-                                      colorScheme.brightness == Brightness.dark
-                                          ? Colors.white.withValues(alpha: 0.7)
-                                          : Colors.grey.withValues(alpha: 0.3),
-                                ),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(
-                                  color:
-                                      colorScheme.brightness == Brightness.dark
-                                          ? Colors.white.withValues(alpha: 0.7)
-                                          : Colors.grey.withValues(alpha: 0.3),
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(
-                                    color: colorScheme.brightness ==
-                                            Brightness.dark
-                                        ? Colors.white
-                                        : Colors.grey),
-                              ),
-                              suffixIcon: IconButton(
-                                icon: Icon(_showConfirmPassword
-                                    ? Icons.visibility_off
-                                    : Icons.visibility),
-                                onPressed: () {
-                                  setState(() {
-                                    _showConfirmPassword =
-                                        !_showConfirmPassword;
-                                  });
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                   const SizedBox(height: 24),
                   ElevatedButton(
-                    onPressed: _isLoading ? null : _handleSignUp,
+                    onPressed: _isLoading ? null : _handleSignIn,
                     style: ElevatedButton.styleFrom(
                       side: BorderSide(
                         color: colorScheme.brightness == Brightness.dark
-                            ? Colors.white.withValues(alpha: 0.8)
+                            ? Colors.white.withValues(alpha: 0.7)
                             : Colors.grey.withValues(alpha: 0.3),
                       ),
                       shape: RoundedRectangleBorder(
@@ -451,23 +317,45 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               color: colorScheme.onPrimary,
                             ),
                           )
-                        : const Text('Sign Up'),
+                        : const Text('Sign In'),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: _isLoading ? null : _handleGoogleSignIn,
+                    icon: Image.asset(
+                      'lib/assets/google.ico',
+                      height: 24,
+                    ),
+                    label: const Text('Continue with Google'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colorScheme.surface,
+                      foregroundColor: colorScheme.onSurface,
+                      elevation: 1,
+                      side: BorderSide(
+                        color: colorScheme.brightness == Brightness.dark
+                            ? Colors.white.withValues(alpha: 0.7)
+                            : Colors.grey.withValues(alpha: 0.3),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 24),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Already have an account? ",
+                        "Don't have an account? ",
                         style: TextStyle(
                           color: colorScheme.onSurface.withValues(alpha: 0.7),
                         ),
                       ),
                       TextButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, '/');
+                          Navigator.pushNamed(context, '/sign-up');
                         },
-                        child: const Text('Sign in'),
+                        child: const Text('Sign up'),
                       ),
                     ],
                   ),

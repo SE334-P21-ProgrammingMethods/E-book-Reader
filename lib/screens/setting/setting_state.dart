@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 
-class UserState extends Equatable {
+import '../../enums/processing/process_state_enum.dart';
+
+class SettingState extends Equatable {
   final String uid;
   final String name;
   final String email;
@@ -8,8 +10,9 @@ class UserState extends Equatable {
   final bool isLoading;
   final String? error;
   final bool isLoggedOut;
+  final ProcessState processState;
 
-  const UserState({
+  const SettingState({
     this.uid = '',
     this.name = '',
     this.email = '',
@@ -17,9 +20,10 @@ class UserState extends Equatable {
     this.isLoading = false,
     this.error,
     this.isLoggedOut = false,
+    this.processState = ProcessState.idle,
   });
 
-  UserState copyWith({
+  SettingState copyWith({
     String? uid,
     String? name,
     String? email,
@@ -27,8 +31,9 @@ class UserState extends Equatable {
     bool? isLoading,
     String? error,
     bool? isLoggedOut,
+    ProcessState? processState,
   }) {
-    return UserState(
+    return SettingState(
       uid: uid ?? this.uid,
       name: name ?? this.name,
       email: email ?? this.email,
@@ -36,14 +41,15 @@ class UserState extends Equatable {
       isLoading: isLoading ?? this.isLoading,
       error: error,
       isLoggedOut: isLoggedOut ?? false,
+      processState: processState ?? this.processState,
     );
   }
 
   @override
   List<Object?> get props =>
-      [uid, name, email, avatarUrl, isLoading, error, isLoggedOut];
+      [uid, name, email, avatarUrl, isLoading, error, isLoggedOut, processState];
 }
 
-class UserLoggedOut extends UserState {
+class UserLoggedOut extends SettingState {
   const UserLoggedOut() : super(isLoggedOut: true);
 }

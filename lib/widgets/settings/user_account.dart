@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../bloc/user/user_cubit.dart';
-import '../../bloc/user/user_state.dart';
+import '../../screens/setting/setting_cubit.dart';
+import '../../screens/setting/setting_state.dart';
 
 class UserAccount extends StatefulWidget {
   const UserAccount({super.key});
@@ -21,6 +21,24 @@ class _UserAccountState extends State<UserAccount> {
 
   void _showEditNameSheet(BuildContext context, String currentName) {
     final controller = TextEditingController(text: currentName);
+    final userCubit = context.read<SettingCubit>();
+
+    void showResultDialog(String title, String message) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -53,9 +71,68 @@ class _UserAccountState extends State<UserAccount> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () async {
-                    await context.read<UserCubit>().updateName(controller.text);
-                    await context.read<UserCubit>().fetchUser();
+                    final newName = controller.text.trim();
+
+                    // Close the bottom sheet first
                     Navigator.pop(context);
+
+                    if (newName.isEmpty) {
+                      showResultDialog(
+                        'Invalid Name',
+                        'Username cannot be empty.'
+                      );
+                      return;
+                    }
+
+                    if (newName == currentName) {
+                      showResultDialog(
+                        'No Changes',
+                        'The username was not changed.'
+                      );
+                      return;
+                    }
+
+                    try {
+                      // Show loading dialog
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (dialogContext) => const AlertDialog(
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CircularProgressIndicator(),
+                              SizedBox(height: 16),
+                              Text('Updating username...'),
+                            ],
+                          ),
+                        ),
+                      );
+
+                      // Update the name
+                      await userCubit.updateName(newName);
+
+                      // Close loading dialog
+                      Navigator.pop(context);
+
+                      // Refresh user data
+                      await userCubit.fetchUser();
+
+                      // Show success dialog
+                      showResultDialog(
+                        'Success',
+                        'Your username has been updated successfully.'
+                      );
+                    } catch (e) {
+                      // Close loading dialog if open
+                      Navigator.pop(context);
+
+                      // Show error dialog
+                      showResultDialog(
+                        'Error',
+                        'Failed to update username: ${e.toString()}'
+                      );
+                    }
                   },
                   child: const Text('Save'),
                 ),
@@ -68,7 +145,7 @@ class _UserAccountState extends State<UserAccount> {
   }
 
   void _showPasswordResetInfo(BuildContext context) async {
-    await context.read<UserCubit>().sendPasswordReset();
+    await context.read<SettingCubit>().sendPasswordReset();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -110,8 +187,8 @@ class _UserAccountState extends State<UserAccount> {
         await picker.pickImage(source: ImageSource.camera, imageQuality: 85);
     if (picked != null) {
       final file = File(picked.path);
-      await context.read<UserCubit>().uploadAvatar(file);
-      await context.read<UserCubit>().fetchUser();
+      await context.read<SettingCubit>().uploadAvatar(file);
+      await context.read<SettingCubit>().fetchUser();
     }
   }
 
@@ -121,8 +198,8 @@ class _UserAccountState extends State<UserAccount> {
         await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
     if (picked != null) {
       final file = File(picked.path);
-      await context.read<UserCubit>().uploadAvatar(file);
-      await context.read<UserCubit>().fetchUser();
+      await context.read<SettingCubit>().uploadAvatar(file);
+      await context.read<SettingCubit>().fetchUser();
     }
   }
 
@@ -169,7 +246,7 @@ class _UserAccountState extends State<UserAccount> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final userCubit = context.read<UserCubit>();
+    final userCubit = context.read<SettingCubit>();
     String userId = userCubit.state.uid;
     if (userId.isEmpty) {
       final user = FirebaseAuth.instance.currentUser;
@@ -195,7 +272,7 @@ class _UserAccountState extends State<UserAccount> {
         final name = data?['name'] ?? userCubit.state.name;
         final avatarUrl = data?['avatarUrl'] ?? userCubit.state.avatarUrl;
         final email = data?['email'] ?? userCubit.state.email;
-        return BlocBuilder<UserCubit, UserState>(
+        return BlocBuilder<SettingCubit, SettingState>(
           builder: (context, state) {
             if (state.isLoading) {
               return const Center(child: CircularProgressIndicator());
@@ -331,7 +408,7 @@ class _UserAccountState extends State<UserAccount> {
                                 color: theme.colorScheme.error),
                             title: const Text('Logout'),
                             onTap: () {
-                              context.read<UserCubit>().logout();
+                              context.read<SettingCubit>().logout();
                             },
                           ),
                         ),

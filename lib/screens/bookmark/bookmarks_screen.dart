@@ -6,15 +6,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../bloc/book/book_cubit.dart';
-import '../bloc/bookmark/bookmark_cubit.dart';
-import '../bloc/bookmark/bookmark_state.dart';
-import '../models/book.dart';
-import '../models/bookmark.dart';
-import '../screens/epub_reader_screen.dart';
-import '../screens/pdf_reader_screen.dart';
-import '../widgets/bookmark/bookmark_card.dart';
-import '../widgets/components/search_bar.dart' as components;
+import '../../models/book.dart';
+import '../../models/bookmark.dart';
+import '../library/library_cubit.dart';
+import '../reader/epub/epub_reader_screen.dart';
+import '../reader/pdf/pdf_reader_screen.dart';
+import '../../widgets/bookmark/bookmark_card.dart';
+import '../../widgets/components/search_bar.dart' as components;
+import 'bookmark_cubit.dart';
+import 'bookmark_state.dart';
 
 class BookmarksScreen extends StatefulWidget {
   const BookmarksScreen({Key? key}) : super(key: key);
@@ -65,7 +65,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
         await firestore.collection('books').doc(usedBookmark.bookId).get();
     if (!bookDoc.exists) return;
     final book = Book.fromFirestore(bookDoc.data()!, bookDoc.id);
-    context.read<BookCubit>();
+    context.read<LibraryCubit>();
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -92,7 +92,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
         context,
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) =>
-              PDFReaderScreen.withBookCubit(
+              PDFReaderScreen.withLibraryCubit(
             context: context,
             book: book,
             openBookmarkPage: pageNum,
@@ -122,7 +122,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
         context,
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) =>
-              EPUBReaderScreen.withBookCubit(
+              EPUBReaderScreen.withLibraryCubit(
             context: context,
             book: book,
             skipResumeDialog: true,

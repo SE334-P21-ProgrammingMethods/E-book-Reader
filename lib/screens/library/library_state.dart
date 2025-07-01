@@ -1,22 +1,22 @@
-part of 'book_cubit.dart';
+part of 'library_cubit.dart';
 
-class BookState extends Equatable {
+class LibraryState extends Equatable {
   final List<Book> books;
   final bool isLoading;
   final String? error;
 
-  const BookState({
+  const LibraryState({
     this.books = const [],
     this.isLoading = false,
     this.error,
   });
 
-  BookState copyWith({
+  LibraryState copyWith({
     List<Book>? books,
     bool? isLoading,
     String? error,
   }) {
-    return BookState(
+    return LibraryState(
       books: books ?? this.books,
       isLoading: isLoading ?? this.isLoading,
       error: error,

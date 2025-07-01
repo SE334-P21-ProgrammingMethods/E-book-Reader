@@ -32,7 +32,7 @@ class PDFReaderScreen extends StatefulWidget {
     Key? key,
     required this.book,
     this.onSaveLastPage,
-      this.initialPage,
+    this.initialPage,
     this.openBookmarkPage,
     this.skipResumeDialog = false})
       : super(key: key);
@@ -45,7 +45,13 @@ class PDFReaderScreen extends StatefulWidget {
     bool skipResumeDialog = false,
   }) {
     return BlocProvider(
-      create: (context) => PdfReaderCubit(),
+      create: (context) => PdfReaderCubit(
+        book,
+        onSaveLastPage,
+        initialPage,
+        openBookmarkPage,
+        skipResumeDialog,
+      ),
       child: PDFReaderScreen(
         book: book,
         onSaveLastPage: onSaveLastPage,
@@ -64,6 +70,7 @@ class _PDFReaderScreen extends State<PDFReaderScreen>
     with AutomaticKeepAliveClientMixin {
   static final Map<String, PdfViewerController> _controllerCache = {};
   static final Map<String, Future<String>> _futureCache = {};
+  PdfReaderCubit get cubit => context.read<PdfReaderCubit>();
 
   PdfViewerController get _pdfController =>
       _controllerCache.putIfAbsent(widget.book.id, () => PdfViewerController());
@@ -99,8 +106,8 @@ class _PDFReaderScreen extends State<PDFReaderScreen>
     _searchResult?.removeListener(_onSearchResultChanged);
     _searchResult = _pdfController.searchText(searchValue);
     _searchResult?.addListener(_onSearchResultChanged);
-    context.read<PdfReaderCubit>().setSearchText(searchValue);
-    context.read<PdfReaderCubit>().setSearching(true);
+    cubit.setSearchText(searchValue);
+    cubit.setSearching(true);
   }
 
   void _clearSearch() {
@@ -108,8 +115,8 @@ class _PDFReaderScreen extends State<PDFReaderScreen>
     _searchResult?.removeListener(_onSearchResultChanged);
     _searchResult?.clear();
     _searchResult = null;
-    context.read<PdfReaderCubit>().setSearchText('');
-    context.read<PdfReaderCubit>().setSearching(false);
+    cubit.setSearchText('');
+    cubit.setSearching(false);
     setState(() {});
   }
 
@@ -137,7 +144,6 @@ class _PDFReaderScreen extends State<PDFReaderScreen>
   Future<void> _loadScrollDirection() async {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getString('reader_scroll_direction');
-    final cubit = context.read<PdfReaderCubit>();
     if (saved == 'horizontal') {
       cubit.setScrollDirection(PdfScrollDirection.horizontal);
     } else {
@@ -250,7 +256,7 @@ class _PDFReaderScreen extends State<PDFReaderScreen>
                       if (state.isSearching) {
                         _clearSearch();
                       } else {
-                        context.read<PdfReaderCubit>().setSearching(true);
+                        cubit.setSearching(true);
                       }
                     },
                   ),
@@ -294,9 +300,7 @@ class _PDFReaderScreen extends State<PDFReaderScreen>
                           borderRadius:
                               BorderRadius.vertical(top: Radius.circular(24)),
                         ),
-                        builder: (context) => BlocProvider.value(
-                          value: parentBookmarkCubit,
-                          child: Builder(
+                        builder: (context) => Builder(
                             builder: (modalContext) {
                               return DraggableScrollableSheet(
                                 expand: false,
@@ -431,8 +435,8 @@ class _PDFReaderScreen extends State<PDFReaderScreen>
                                                           }
                                                         },
                                                       );
-                                                    },
-                                                  ),
+                                                        },
+                                            ),
                                           ),
                                         ],
                                       );
@@ -441,7 +445,6 @@ class _PDFReaderScreen extends State<PDFReaderScreen>
                                 },
                               );
                             },
-                          ),
                         ),
                       );
                     },
@@ -508,7 +511,6 @@ class _PDFReaderScreen extends State<PDFReaderScreen>
                             ? 'Switch to Horizontal Scroll'
                             : 'Switch to Vertical Scroll',
                     onPressed: () {
-                      final cubit = context.read<PdfReaderCubit>();
                       final newDirection =
                           state.scrollDirection == PdfScrollDirection.vertical
                               ? PdfScrollDirection.horizontal
@@ -888,9 +890,8 @@ class _PDFReaderScreen extends State<PDFReaderScreen>
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (context) => BlocProvider.value(
-        value: parentBookmarkCubit,
-        child: Builder(
+      builder: (context) => Builder(
+        builder: (context) => Builder(
           builder: (modalContext) {
             return DraggableScrollableSheet(
               expand: false,

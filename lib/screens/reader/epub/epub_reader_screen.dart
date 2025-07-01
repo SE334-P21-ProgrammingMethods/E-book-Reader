@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ebook_reader/screens/reader/epub/epub_reader_cubit.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,34 +24,42 @@ import '../../theme/theme_cubit.dart';
 
 class EPUBReaderScreen extends StatefulWidget {
   final Book book;
-  final Future<void> Function(String bookId, String lastReadPage)?
-      onSaveLastProgress;
+  final Future<void> Function(String bookId, String lastReadPage)? onSaveLastProgress;
   final String? initialCfi;
   final bool skipResumeDialog;
   final String? openBookmarkCfi;
-  const EPUBReaderScreen(
-      {Key? key,
-      required this.book,
-      this.onSaveLastProgress,
-      this.initialCfi,
-      this.skipResumeDialog = false,
-      this.openBookmarkCfi})
-      : super(key: key);
+
+  const EPUBReaderScreen({
+    Key? key,
+    required this.book,
+    this.onSaveLastProgress,
+    this.initialCfi,
+    this.skipResumeDialog = false,
+    this.openBookmarkCfi,
+  }) : super(key: key);
 
   static Widget newInstance({
     required Book book,
-    Future<void> Function(String bookId, String lastReadPage)?
-        onSaveLastProgress,
+    Future<void> Function(String bookId, String lastReadPage)? onSaveLastProgress,
     String? initialCfi,
     bool skipResumeDialog = false,
     String? openBookmarkCfi,
   }) {
-    return EPUBReaderScreen(
-      book: book,
-      onSaveLastProgress: onSaveLastProgress,
-      initialCfi: initialCfi,
-      skipResumeDialog: skipResumeDialog,
-      openBookmarkCfi: openBookmarkCfi,
+    return BlocProvider(
+      create: (context) => EpubReaderCubit(
+        book,
+        onSaveLastProgress,
+        initialCfi,
+        skipResumeDialog,
+        openBookmarkCfi,
+      ),
+      child: EPUBReaderScreen(
+        book: book,
+        onSaveLastProgress: onSaveLastProgress,
+        initialCfi: initialCfi,
+        skipResumeDialog: skipResumeDialog,
+        openBookmarkCfi: openBookmarkCfi,
+      ),
     );
   }
 
@@ -79,6 +90,8 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
   EpubTheme _epubTheme = EpubTheme.light();
   String? _pendingInitialCfi;
   bool _hasJumpedToInitialCfi = false;
+
+  EpubReaderCubit get cubit => context.read<EpubReaderCubit>();
 
   @override
   void initState() {
@@ -132,11 +145,12 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
           if (decoded is Map && decoded['startCfi'] is String) {
             cfiString = decoded['startCfi'];
           }
-        } catch (_) {}
-        // Also update Firestore lastReadPage with the CFI string only
-        final cubit = context.read<LibraryCubit>();
-        await cubit.updateLastReadPage(
-            bookId: widget.book.id, lastReadPage: cfiString);
+        } catch (_) {
+          // If JSON decoding fails, keep the original CFI
+          if (kDebugMode) {
+            print('DEBUG: Failed to decode initial CFI JSON: ${widget.initialCfi}');
+          }
+        }
       }
     });
   }
@@ -167,10 +181,6 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
     if (widget.onSaveLastProgress != null) {
       await widget.onSaveLastProgress!(widget.book.id, cfi);
     }
-    // Also update Firestore lastReadPage with the CFI string only
-    final cubit = context.read<LibraryCubit>();
-    await cubit.updateLastReadPage(
-        bookId: widget.book.id, lastReadPage: cfiString);
   }
 
   Future<String?> _getLastCfi() async {

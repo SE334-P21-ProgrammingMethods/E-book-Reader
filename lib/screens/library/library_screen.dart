@@ -126,7 +126,7 @@ class _LibraryScreenState extends State<LibraryScreen>
                 context,
                 PageRouteBuilder(
                   pageBuilder: (context, animation, secondaryAnimation) =>
-                      PDFReaderScreen(
+                      PDFReaderScreen.newInstance(
                     book: book,
                     onSaveLastPage: (bookId, lastReadPage) async {
                       await cubit.updateLastReadPage(
@@ -146,7 +146,15 @@ class _LibraryScreenState extends State<LibraryScreen>
                 context,
                 PageRouteBuilder(
                   pageBuilder: (context, animation, secondaryAnimation) =>
-                      EPUBReaderScreen(book: book),
+                      EPUBReaderScreen.newInstance(
+                        book: book,
+                        onSaveLastProgress: (bookId, lastReadPage) async {
+                          await cubit.updateLastReadPage(
+                            bookId: bookId,
+                            lastReadPage: lastReadPage,
+                          );
+                        },
+                      ),
                   transitionsBuilder:
                       (context, animation, secondaryAnimation, child) {
                     return child;

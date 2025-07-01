@@ -110,11 +110,48 @@ class _PDFReaderScreen extends State<PDFReaderScreen>
       _clearSearch();
       return;
     }
+
+    // Make sure to clean up any existing search first
     _searchResult?.removeListener(_onSearchResultChanged);
+    if (_searchResult != null) {
+      _searchResult!.clear();
+    }
+
+    // First attempt with spaces (original text)
     _searchResult = _pdfController.searchText(searchValue);
+
+    // Set up the listener just once - this will update UI when results come in
     _searchResult?.addListener(_onSearchResultChanged);
+
+    // Update state
     cubit.setSearchText(searchValue);
     cubit.setSearching(true);
+
+    // Check if we should try without spaces after a delay
+    if (searchValue.contains(' ')) {
+      // Use Future.delayed to ensure the first search completes
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (!mounted) return;
+
+        // Only try alternative search if first search found nothing
+        if (_searchResult?.totalInstanceCount == 0) {
+          final noSpaceValue = searchValue.replaceAll(' ', '');
+
+          // Important: Remove the old listener first
+          _searchResult?.removeListener(_onSearchResultChanged);
+          if (_searchResult != null) {
+            _searchResult!.clear();
+          }
+
+          // Try without spaces
+          _searchResult = _pdfController.searchText(noSpaceValue);
+          _searchResult?.addListener(_onSearchResultChanged);
+
+          // Update UI
+          setState(() {});
+        }
+      });
+    }
   }
 
   void _clearSearch() {
@@ -698,34 +735,6 @@ class _PDFReaderScreen extends State<PDFReaderScreen>
                                                 }
                                               : null,
                                         ),
-                                        const Spacer(),
-                                        if (state.totalPages > 0)
-                                          Container(
-                                            margin:
-                                                const EdgeInsets.only(right: 4),
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 8, vertical: 2),
-                                            decoration: BoxDecoration(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary
-                                                  .withValues(alpha: 0.08),
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                            ),
-                                            child: Text(
-                                              '${((state.currentPage / state.totalPages) * 100).toStringAsFixed(0)}%',
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .bodySmall
-                                                  ?.copyWith(
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .primary,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                            ),
-                                          ),
                                       ],
                                     ),
                                   ),

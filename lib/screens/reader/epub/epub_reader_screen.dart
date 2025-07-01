@@ -327,7 +327,7 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
       spans.add(TextSpan(
         text: excerpt.substring(match.start, match.end),
         style: const TextStyle(
-          backgroundColor: Colors.yellow,
+          backgroundColor: Colors.orange,
           fontWeight: FontWeight.bold,
         ),
       ));
@@ -338,7 +338,9 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
     }
     return RichText(
         text: TextSpan(
-            style: const TextStyle(color: Colors.black), children: spans));
+            // Use the current theme's text color instead of hardcoded black
+            style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
+            children: spans));
   }
 
   List<ContextMenuItem> get _menuItems {

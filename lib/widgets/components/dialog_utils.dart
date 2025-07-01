@@ -71,20 +71,20 @@ Future<String?> showRenameDialog(
                         style: TextStyle(color: theme.colorScheme.onSurface),
                         decoration: InputDecoration(
                           labelText: 'File name',
-                          labelStyle: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
+                          labelStyle: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.7)), 
                           filled: true,
                           fillColor: theme.colorScheme.surface,
                           errorText: errorText,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                             borderSide: BorderSide(
-                              color: theme.colorScheme.onSurface.withOpacity(0.3),
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                             ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                             borderSide: BorderSide(
-                              color: theme.colorScheme.onSurface.withOpacity(0.3),
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
@@ -185,20 +185,20 @@ Future<String?> showEditBookDialog(
                   style: TextStyle(color: theme.colorScheme.onSurface),
                   decoration: InputDecoration(
                     labelText: 'Book name',
-                    labelStyle: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.7)),
+                    labelStyle: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
                     filled: true,
                     fillColor: theme.colorScheme.surface,
                     errorText: errorText,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: BorderSide(
-                        color: theme.colorScheme.onSurface.withOpacity(0.3),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: BorderSide(
-                        color: theme.colorScheme.onSurface.withOpacity(0.3),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(

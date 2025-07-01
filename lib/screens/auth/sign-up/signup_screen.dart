@@ -175,20 +175,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             decoration: InputDecoration(
                               hintText: 'Your name',
                               hintStyle: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6), 
                               ),
                               filled: true,
                               fillColor: Theme.of(context).colorScheme.surface,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
-                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                                 ),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
-                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(
@@ -236,20 +236,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             decoration: InputDecoration(
                               hintText: 'your@email.com',
                               hintStyle: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                               ),
                               filled: true,
                               fillColor: Theme.of(context).colorScheme.surface,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
-                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                                 ),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
-                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(
@@ -299,20 +299,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             decoration: InputDecoration(
                               hintText: '••••••••',
                               hintStyle: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                               ),
                               filled: true,
                               fillColor: Theme.of(context).colorScheme.surface,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
-                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                                 ),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
-                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(
@@ -371,20 +371,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             decoration: InputDecoration(
                               hintText: '••••••••',
                               hintStyle: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6), 
                               ),
                               filled: true,
                               fillColor: Theme.of(context).colorScheme.surface,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
-                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                                 ),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
-                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(

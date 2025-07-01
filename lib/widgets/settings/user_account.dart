@@ -74,7 +74,7 @@ class _UserAccountState extends State<UserAccount> {
                       labelText: 'Username',
                       border: const OutlineInputBorder(),
                       errorText: errorText,
-                      labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+                      labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)), 
                       filled: true,
                       fillColor: Theme.of(context).colorScheme.surface,
                       focusedBorder: OutlineInputBorder(

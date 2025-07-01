@@ -181,7 +181,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                 color: Theme.of(context)
                                     .colorScheme
                                     .onSurface
-                                    .withOpacity(0.6),
+                                    .withValues(alpha: 0.6), 
                               ),
                               filled: true,
                               fillColor: Theme.of(context).colorScheme.surface,
@@ -191,7 +191,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                   color: Theme.of(context)
                                       .colorScheme
                                       .onSurface
-                                      .withOpacity(0.3),
+                                      .withValues(alpha: 0.3),
                                 ),
                               ),
                               enabledBorder: OutlineInputBorder(
@@ -200,7 +200,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                   color: Theme.of(context)
                                       .colorScheme
                                       .onSurface
-                                      .withOpacity(0.3),
+                                      .withValues(alpha: 0.3),
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(
@@ -262,20 +262,20 @@ class _SignInScreenState extends State<SignInScreen> {
                             decoration: InputDecoration(
                               hintText: '••••••••',
                               hintStyle: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                               ),
                               filled: true,
                               fillColor: Theme.of(context).colorScheme.surface,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
-                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                                 ),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
-                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(

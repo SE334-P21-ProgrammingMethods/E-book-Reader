@@ -1,10 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ebook_reader/screens/reader/epub/epub_reader_cubit.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,7 +17,6 @@ import '../../../models/bookmark.dart';
 import '../../../widgets/bookmark/bookmark_card.dart';
 import '../../bookmark/bookmark_cubit.dart';
 import '../../bookmark/bookmark_state.dart';
-import '../../library/library_cubit.dart';
 import '../../theme/theme_cubit.dart';
 
 class EPUBReaderScreen extends StatefulWidget {
@@ -160,11 +157,9 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
           await widget.onSaveLastProgress!(widget.book.id, widget.initialCfi!);
         }
         // Extract startCfi if initialCfi is a JSON string
-        String cfiString = widget.initialCfi!;
         try {
           final decoded = jsonDecode(widget.initialCfi!);
           if (decoded is Map && decoded['startCfi'] is String) {
-            cfiString = decoded['startCfi'];
           }
         } catch (_) {
           // If JSON decoding fails, keep the original CFI
@@ -192,11 +187,9 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
       print('DEBUG: Saved EPUB last CFI: $cfi');
     }
     // Extract startCfi if cfi is a JSON string
-    String cfiString = cfi;
     try {
       final decoded = jsonDecode(cfi);
       if (decoded is Map && decoded['startCfi'] is String) {
-        cfiString = decoded['startCfi'];
       }
     } catch (_) {}
     if (widget.onSaveLastProgress != null) {
@@ -929,14 +922,14 @@ class _EPUBReaderScreenState extends State<EPUBReaderScreen> {
                         decoration: InputDecoration(
                           hintText: 'Search...',
                           hintStyle: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6), 
                           ),
                           filled: true,
                           fillColor: Theme.of(context).colorScheme.surface,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                             borderSide: BorderSide(
-                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                             ),
                           ),
                           isDense: true,

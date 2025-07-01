@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 import '../../../models/book.dart';
 

@@ -714,7 +714,11 @@ class _PDFReaderScreen extends State<PDFReaderScreen>
                                           'Page ${state.currentPage}/${state.totalPages}',
                                           style: Theme.of(context)
                                               .textTheme
-                                              .bodyMedium,
+                                              .bodyMedium?.copyWith(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurface,
+                                              ),
                                         ),
                                         IconButton(
                                           icon: const Icon(Icons.chevron_right),
